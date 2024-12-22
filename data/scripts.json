@@ -1,0 +1,25 @@
+{
+  "scripts": [
+    {
+      "id": "1",
+      "name": "Hello World",
+      "type": "python",
+      "content": "print('Hello, World!')",
+      "requirements": ["requests==2.26.0"],
+      "tags": ["demo", "python"],
+      "schedule": "0 * * * *",
+      "logs": []
+    },
+    {
+      "id": "2",
+      "name": "Current Date",
+      "type": "bash",
+      "content": "date",
+      "requirements": [],
+      "tags": ["utility", "bash"],
+      "schedule": "",
+      "logs": []
+    }
+  ]
+}
+
