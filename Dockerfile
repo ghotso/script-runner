@@ -73,7 +73,6 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
-
 # Copy and set up start script
 COPY --chown=nextjs:nodejs start.sh ./
 RUN chmod +x start.sh

@@ -16,7 +16,6 @@ if [ ! -d "/data/logs" ] || [ ! -d "/data/logs/runs" ]; then
 fi
 
 log_message "Setting permissions for log directories..."
-chown -R nextjs:nodejs /data/logs /data/logs/runs || log_message "Failed to set ownership for log directories"
 chmod -R 755 /data/logs /data/logs/runs || log_message "Failed to set permissions for log directories"
 
 log_message "Log directories created and permissions set"
@@ -37,8 +36,16 @@ install_requirements() {
             echo "$REQUIREMENTS" | tee -a /data/logs/container.log
             log_message "Installing requirements..."
             echo "$REQUIREMENTS" | while read req; do
-                log_message "Installing: $req"
-                pip install "$req" || log_message "Failed to install $req"
+                if pip3 show "$req" > /dev/null 2>&1; then
+                    log_message "$req is already installed."
+                else
+                    log_message "Installing: $req"
+                    if pip3 install --user "$req"; then
+                        log_message "$req installed successfully."
+                    else
+                        log_message "Error: Failed to install $req"
+                    fi
+                fi
             done
             log_message "All requirements installation attempts completed."
         else

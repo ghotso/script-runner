@@ -68,53 +68,53 @@ export async function updateRequirements(scriptId: string, requirements: string[
 }
 
 export async function installRequirements(scriptId: string) {
-  const scripts = await getScripts();
-  const script = scripts.find((s: Script) => s.id === scriptId);
-  if (script && script.requirements.length > 0) {
-    console.log(`Installing requirements for script ${scriptId}: ${script.requirements.join(', ')}`);
-    try {
-      const { stdout } = await execAsync(`${process.env.PYTHON_PATH || 'python3'} -m pip freeze`);
-      const installedPackages = new Set(stdout.split('\n').map((pkg: string) => pkg.split('==')[0].toLowerCase()));
-      const packagesToInstall = script.requirements.filter((req: string) => 
-        !installedPackages.has(req.toLowerCase())
-      );
-      
-      if (packagesToInstall.length === 0) {
-        return { 
-          success: true, 
-          message: 'All requirements are already installed.' 
-        };
-      }
-      
-      const { stdout: installStdout, stderr: installStderr } = await execAsync(
-        `${process.env.PYTHON_PATH || 'python3'} -m pip install ${packagesToInstall.join(' ')}`
-      );
-      
-      if (installStderr) {
-        console.error('Error installing requirements:', installStderr);
-        return { 
-          success: false, 
-          message: 'Failed to install requirements. Check the logs for more details.' 
-        };
-      }
-      
-      console.log('Requirements installed successfully:', installStdout);
-      return { 
-        success: true, 
-        message: `Successfully installed: ${packagesToInstall.join(', ')}` 
-      };
-    } catch (error) {
-      console.error('Error installing requirements:', error);
-      return { 
-        success: false, 
-        message: 'An error occurred while installing requirements.' 
-      };
+    const scripts = await getScripts();
+    const script = scripts.find((s: Script) => s.id === scriptId);
+    if (script && script.requirements.length > 0) {
+        console.log(`Installing requirements for script ${scriptId}: ${script.requirements.join(', ')}`);
+        try {
+            const { stdout } = await execAsync(`${process.env.PYTHON_PATH || 'python3'} -m pip freeze`);
+            const installedPackages = new Set(stdout.split('\n').map((pkg: string) => pkg.split('==')[0].toLowerCase()));
+            const packagesToInstall = script.requirements.filter((req: string) => 
+                !installedPackages.has(req.toLowerCase())
+            );
+            
+            if (packagesToInstall.length === 0) {
+                return { 
+                    success: true, 
+                    message: 'All requirements are already installed.' 
+                };
+            }
+            
+            const { stdout: installStdout, stderr: installStderr } = await execAsync(
+                `${process.env.PYTHON_PATH || 'python3'} -m pip install --user ${packagesToInstall.join(' ')}`
+            );
+            
+            if (installStderr) {
+                console.error('Error installing requirements:', installStderr);
+                return { 
+                    success: false, 
+                    message: 'Failed to install requirements. Check the logs for more details.' 
+                };
+            }
+            
+            console.log('Requirements installed successfully:', installStdout);
+            return { 
+                success: true, 
+                message: `Successfully installed: ${packagesToInstall.join(', ')}` 
+            };
+        } catch (error) {
+            console.error('Error installing requirements:', error);
+            return { 
+                success: false, 
+                message: 'An error occurred while installing requirements.' 
+            };
+        }
     }
-  }
-  return { 
-    success: true, 
-    message: 'No requirements to install.' 
-  };
+    return { 
+        success: true, 
+        message: 'No requirements to install.' 
+    };
 }
 
 export async function updateSchedule(scriptId: string, schedules: string) {
@@ -161,59 +161,59 @@ async function writeToLogFile(content: string) {
 }
 
 async function writeToRunLogFile(scriptId: string, content: string) {
-  try {
-    const timestamp = new Date().toISOString().replace(/:/g, '-');
-    const logFileName = `${scriptId}_${timestamp}.log`;
-    const logFilePath = path.join(RUNS_LOGS_PATH, logFileName);
-    await fs.mkdir(path.dirname(logFilePath), { recursive: true });
-    await fs.writeFile(logFilePath, content);
+    try {
+        const timestamp = new Date().toISOString().replace(/:/g, '-');
+        const logFileName = `${scriptId}_${timestamp}.log`;
+        const logFilePath = path.join(RUNS_LOGS_PATH, logFileName);
+        await fs.mkdir(path.dirname(logFilePath), { recursive: true });
+        await fs.writeFile(logFilePath, content);
 
-    // Implement log rotation for run logs (keep last 20 logs)
-    const logFiles = await fs.readdir(RUNS_LOGS_PATH);
-    const scriptLogs = logFiles.filter(file => file.startsWith(`${scriptId}_`));
-    
-    if (scriptLogs.length > 20) {
-      scriptLogs.sort((a, b) => {
-        const timeA = a.split('_')[1].split('.')[0];
-        const timeB = b.split('_')[1].split('.')[0];
-        return new Date(timeB).getTime() - new Date(timeA).getTime();
-      });
+        // Implement log rotation for run logs (keep last 20 logs)
+        const logFiles = await fs.readdir(RUNS_LOGS_PATH);
+        const scriptLogs = logFiles.filter(file => file.startsWith(`${scriptId}_`));
+        
+        if (scriptLogs.length > 20) {
+            scriptLogs.sort((a, b) => {
+                const timeA = a.split('_')[1].split('.')[0];
+                const timeB = b.split('_')[1].split('.')[0];
+                return new Date(timeB).getTime() - new Date(timeA).getTime();
+            });
 
-      for (let i = 20; i < scriptLogs.length; i++) {
-        await fs.unlink(path.join(RUNS_LOGS_PATH, scriptLogs[i]));
-      }
+            for (let i = 20; i < scriptLogs.length; i++) {
+                await fs.unlink(path.join(RUNS_LOGS_PATH, scriptLogs[i]));
+            }
+        }
+    } catch (error) {
+        console.error('Error writing to run log file:', error);
     }
-  } catch (error) {
-    console.error('Error writing to run log file:', error);
-  }
 }
 
 export async function runScript(scriptId: string) {
-  try {
-    const scripts = await getScripts();
-    const script = scripts.find((s: Script) => s.id === scriptId);
+    try {
+        const scripts = await getScripts();
+        const script = scripts.find((s: Script) => s.id === scriptId);
 
-    if (!script) {
-      throw new Error('Script not found');
-    }
+        if (!script) {
+            throw new Error('Script not found');
+        }
 
-    console.log(`Running script: ${script.name}`);
-    const startTime = new Date();
-    let status = 'Completed';
-    let output = '';
+        console.log(`Running script: ${script.name}`);
+        const startTime = new Date();
+        let status = 'Completed';
+        let output = '';
 
-    if (script.type === 'python') {
-      output = await executePythonScript(script.content);
-    } else if (script.type === 'bash') {
-      output = await executeBashScript(script.content);
-    } else {
-      throw new Error('Unsupported script type');
-    }
+        if (script.type === 'python') {
+            output = await executePythonScript(script.content);
+        } else if (script.type === 'bash') {
+            output = await executeBashScript(script.content);
+        } else {
+            throw new Error('Unsupported script type');
+        }
 
-    const endTime = new Date();
-    const duration = endTime.getTime() - startTime.getTime();
+        const endTime = new Date();
+        const duration = endTime.getTime() - startTime.getTime();
 
-    const logContent = `
+        const logContent = `
 Script ID: ${scriptId}
 Name: ${script.name}
 Type: ${script.type}
@@ -223,28 +223,33 @@ Duration: ${duration}ms
 Status: ${status}
 Output:
 ${output}
-    `;
+        `;
 
-    await writeToLogFile(logContent);
-    await writeToRunLogFile(scriptId, logContent);
+        await writeToLogFile(logContent);
+        await writeToRunLogFile(scriptId, logContent);
 
-    const newLog: Log = {
-      timestamp: startTime.toISOString(),
-      status: status,
-      duration: duration,
-      output: output || 'Script executed successfully with no output'
-    };
+        const newLog: Log = {
+            timestamp: startTime.toISOString(),
+            status: status,
+            duration: duration,
+            output: output || 'Script executed successfully with no output'
+        };
 
-    script.logs.push(newLog);
-    script.logs = script.logs.slice(-12);
+        script.logs.push(newLog);
+        script.logs = script.logs.slice(-12);
 
-    await saveScript(script);
+        await saveScript(script);
 
-    return { success: true, output };
-  } catch (error: any) {
-    console.error('Error running script:', error);
-    return { success: false, error: error.message };
-  }
+        return { success: true, output };
+    } catch (error: any) {
+        console.error('Error running script:', error);
+        const errorOutput = error.message || 'An unknown error occurred';
+        
+        // Send Discord notification for failed run
+        await sendDiscordNotification(script, startTime, errorOutput);
+
+        return { success: false, error: errorOutput };
+    }
 }
 
 async function executePythonScript(content: string) {
@@ -314,57 +319,57 @@ export async function updateSettings(settings: Settings) {
 }
 
 async function sendDiscordNotification(script: Script, startTime: Date, output: string) {
-  const settings = await getSettingsFromAPI();
-  if (!settings.discordWebhook) {
-    console.log('Discord webhook not configured. Skipping notification.');
-    return;
-  }
-
-  const embed = {
-    title: `Script Execution Failed: ${script.name}`,
-    color: 0xFF0000, // Red color for error
-    fields: [
-      {
-        name: 'Script ID',
-        value: script.id,
-        inline: true
-      },
-      {
-        name: 'Script Type',
-        value: script.type,
-        inline: true
-      },
-      {
-        name: 'Execution Time',
-        value: startTime.toISOString(),
-        inline: true
-      },
-      {
-        name: 'Error Output',
-        value: output.substring(0, 1024) // Discord has a 1024 character limit for field values
-      }
-    ],
-    timestamp: new Date().toISOString()
-  };
-
-  const payload = {
-    embeds: [embed]
-  };
-
-  try {
-    const response = await fetch(settings.discordWebhook, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      console.error('Failed to send Discord notification:', await response.text());
+    const settings = await getSettingsFromAPI();
+    if (!settings.discordWebhook) {
+        console.log('Discord webhook not configured. Skipping notification.');
+        return;
     }
-  } catch (error) {
-    console.error('Error sending Discord notification:', error);
-  }
+
+    const embed = {
+        title: `Script Execution Failed: ${script.name}`,
+        color: 0xFF0000, // Red color for error
+        fields: [
+            {
+                name: 'Script ID',
+                value: script.id,
+                inline: true
+            },
+            {
+                name: 'Script Type',
+                value: script.type,
+                inline: true
+            },
+            {
+                name: 'Execution Time',
+                value: startTime.toISOString(),
+                inline: true
+            },
+            {
+                name: 'Error Output',
+                value: output.substring(0, 1024) // Discord has a 1024 character limit for field values
+            }
+        ],
+        timestamp: new Date().toISOString()
+    };
+
+    const payload = {
+        embeds: [embed]
+    };
+
+    try {
+        const response = await fetch(settings.discordWebhook, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            console.error('Failed to send Discord notification:', await response.text());
+        }
+    } catch (error) {
+        console.error('Error sending Discord notification:', error);
+    }
 }
 
