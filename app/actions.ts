@@ -136,45 +136,55 @@ export async function updateTags(scriptId: string, tags: string[]) {
 }
 
 async function writeToLogFile(content: string) {
-  const timestamp = new Date().toISOString().split('T')[0]; // Get current date
-  const logFileName = `${timestamp}.log`;
-  const logFilePath = path.join(LOGS_PATH, logFileName);
-  await fs.appendFile(logFilePath, content + '\n');
+  try {
+    const timestamp = new Date().toISOString().split('T')[0]; // Get current date
+    const logFileName = `${timestamp}.log`;
+    const logFilePath = path.join(LOGS_PATH, logFileName);
+    await fs.mkdir(path.dirname(logFilePath), { recursive: true });
+    await fs.appendFile(logFilePath, content + '\n');
 
-  // Implement log rotation for container logs (keep last 7 days)
-  const logFiles = await fs.readdir(LOGS_PATH);
-  const dateThreshold = new Date();
-  dateThreshold.setDate(dateThreshold.getDate() - 7);
+    // Implement log rotation for container logs (keep last 7 days)
+    const logFiles = await fs.readdir(LOGS_PATH);
+    const dateThreshold = new Date();
+    dateThreshold.setDate(dateThreshold.getDate() - 7);
 
-  for (const file of logFiles) {
-    const filePath = path.join(LOGS_PATH, file);
-    const stats = await fs.stat(filePath);
-    if (stats.isFile() && stats.mtime < dateThreshold) {
-      await fs.unlink(filePath);
+    for (const file of logFiles) {
+      const filePath = path.join(LOGS_PATH, file);
+      const stats = await fs.stat(filePath);
+      if (stats.isFile() && stats.mtime < dateThreshold) {
+        await fs.unlink(filePath);
+      }
     }
+  } catch (error) {
+    console.error('Error writing to log file:', error);
   }
 }
 
 async function writeToRunLogFile(scriptId: string, content: string) {
-  const timestamp = new Date().toISOString().replace(/:/g, '-');
-  const logFileName = `${scriptId}_${timestamp}.log`;
-  const logFilePath = path.join(RUNS_LOGS_PATH, logFileName);
-  await fs.writeFile(logFilePath, content);
+  try {
+    const timestamp = new Date().toISOString().replace(/:/g, '-');
+    const logFileName = `${scriptId}_${timestamp}.log`;
+    const logFilePath = path.join(RUNS_LOGS_PATH, logFileName);
+    await fs.mkdir(path.dirname(logFilePath), { recursive: true });
+    await fs.writeFile(logFilePath, content);
 
-  // Implement log rotation for run logs (keep last 20 logs)
-  const logFiles = await fs.readdir(RUNS_LOGS_PATH);
-  const scriptLogs = logFiles.filter(file => file.startsWith(`${scriptId}_`));
-  
-  if (scriptLogs.length > 20) {
-    scriptLogs.sort((a, b) => {
-      const timeA = a.split('_')[1].split('.')[0];
-      const timeB = b.split('_')[1].split('.')[0];
-      return new Date(timeB).getTime() - new Date(timeA).getTime();
-    });
+    // Implement log rotation for run logs (keep last 20 logs)
+    const logFiles = await fs.readdir(RUNS_LOGS_PATH);
+    const scriptLogs = logFiles.filter(file => file.startsWith(`${scriptId}_`));
+    
+    if (scriptLogs.length > 20) {
+      scriptLogs.sort((a, b) => {
+        const timeA = a.split('_')[1].split('.')[0];
+        const timeB = b.split('_')[1].split('.')[0];
+        return new Date(timeB).getTime() - new Date(timeA).getTime();
+      });
 
-    for (let i = 20; i < scriptLogs.length; i++) {
-      await fs.unlink(path.join(RUNS_LOGS_PATH, scriptLogs[i]));
+      for (let i = 20; i < scriptLogs.length; i++) {
+        await fs.unlink(path.join(RUNS_LOGS_PATH, scriptLogs[i]));
+      }
     }
+  } catch (error) {
+    console.error('Error writing to run log file:', error);
   }
 }
 
@@ -238,19 +248,33 @@ ${output}
 }
 
 async function executePythonScript(content: string) {
-  const { stdout, stderr } = await execAsync(`${process.env.PYTHON_PATH || 'python3'} -c "${content}"`);
-  if (stderr) {
-    console.error('Python script error:', stderr);
+  try {
+    const escapedContent = content.replace(/"/g, '\\"');
+    const { stdout, stderr } = await execAsync(`${process.env.PYTHON_PATH || 'python3'} -c "${escapedContent}"`);
+    if (stderr) {
+      console.error('Python script error:', stderr);
+      return stderr;
+    }
+    return stdout;
+  } catch (error: any) {
+    console.error('Error executing Python script:', error);
+    return error.message;
   }
-  return stdout || stderr;
 }
 
 async function executeBashScript(content: string) {
-  const { stdout, stderr } = await execAsync(`bash -c "${content}"`);
-  if (stderr) {
-    console.error('Bash script error:', stderr);
+  try {
+    const escapedContent = content.replace(/"/g, '\\"');
+    const { stdout, stderr } = await execAsync(`bash -c "${escapedContent}"`);
+    if (stderr) {
+      console.error('Bash script error:', stderr);
+      return stderr;
+    }
+    return stdout;
+  } catch (error: any) {
+    console.error('Error executing Bash script:', error);
+    return error.message;
   }
-  return stdout || stderr;
 }
 
 export async function deleteScript(scriptId: string) {

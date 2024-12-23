@@ -2,6 +2,11 @@
 
 echo "Container startup script beginning..."
 
+# Ensure log directories exist and have correct permissions
+mkdir -p /data/logs /data/logs/runs
+chown -R nextjs:nodejs /data/logs /data/logs/runs
+chmod 755 /data/logs /data/logs/runs
+
 # Function to install requirements
 install_requirements() {
   SCRIPTS_FILE=${SCRIPTS_PATH:-/data/scripts.json}

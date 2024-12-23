@@ -24,19 +24,19 @@ interface LogViewerProps {
 export default function LogViewer({ scriptId }: LogViewerProps) {
   const [logs, setLogs] = useState<Log[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] =useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const fetchLogs = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/logs/${scriptId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch logs');
+      const script = await getScript(scriptId);
+      if (script) {
+        setLogs(script.logs || []);
+      } else {
+        setError('Script not found');
       }
-      const logs = await response.json();
-      setLogs(logs);
     } catch (error) {
       console.error('Error fetching logs:', error);
       setError('Failed to fetch logs. Please try again later.');
