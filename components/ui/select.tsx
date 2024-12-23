@@ -16,7 +16,9 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps<string>>(
           bg-white/5 border-white/10 focus:border-white/20 ${className}`}
         onChange={(e) => onValueChange?.(e.target.value)}
         {...props}
-      />
+      >
+        {props.children}
+      </select>
     )
   }
 )

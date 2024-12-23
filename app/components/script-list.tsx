@@ -106,6 +106,10 @@ export default function ScriptList({ initialScripts }: ScriptListProps) {
                     </Tag>
                   ))}
                 </div>
+                <div className="mb-4">
+                  <p className="text-sm text-white/70">Schedules:</p>
+                  <p className="text-sm text-white">{script.schedule || 'No schedules set'}</p>
+                </div>
                 <Link 
                   href={`/script/${script.id}`}
                   className="text-blue-400 hover:text-blue-300 transition-colors inline-flex items-center gap-2"

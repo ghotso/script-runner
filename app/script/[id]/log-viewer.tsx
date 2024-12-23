@@ -54,8 +54,8 @@ export default function LogViewer({ logs }: LogViewerProps) {
           <p className="text-gray-400">No execution logs available yet</p>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          {logs.slice().reverse().map((log: Log, index: number) => (
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {logs.slice(-12).reverse().map((log: Log, index: number) => (
             <Dialog key={index}>
               <DialogTrigger className="w-full">
                 <div 

@@ -75,9 +75,13 @@ ENV HOSTNAME="0.0.0.0"
 ENV SCRIPTS_PATH="/data/scripts.json"
 ENV PYTHON_PATH="/usr/bin/python3"
 
+# Install requirements for all scripts
+COPY install_requirements.sh /app/install_requirements.sh
+RUN chmod +x /app/install_requirements.sh
+CMD ["/bin/sh", "-c", "/app/install_requirements.sh && node server.js"]
+
 # Expose port
 EXPOSE 3000
 
 # Start the application
-CMD ["node", "server.js"]
 

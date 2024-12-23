@@ -146,11 +146,11 @@ export async function installRequirements(scriptId: string) {
   };
 }
 
-export async function updateSchedule(scriptId: string, schedule: string) {
+export async function updateSchedule(scriptId: string, schedules: string) {
   const scripts = await getScripts();
   const script = scripts.find((s: Script) => s.id === scriptId);
   if (script) {
-    script.schedule = schedule;
+    script.schedule = schedules;
     await saveScripts(scripts);
   }
 }
