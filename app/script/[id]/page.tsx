@@ -8,17 +8,12 @@ import DeleteScriptButton from './delete-script-button';
 import { getScript } from '@/lib/scripts';
 import SettingsCard from './settings-card';
 
-// Remove the PageProps interface
-// interface PageProps {
-//   params: { id: string };
-// }
+type PageProps = {
+  params: { id: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+};
 
-// Use the correct type for the params
-export default async function ScriptDetail({
-  params,
-}: {
-  params: { id: string }
-}) {
+export default async function ScriptDetail({ params, searchParams }: PageProps) {
   const script = await getScript(params.id);
 
   if (!script) {
