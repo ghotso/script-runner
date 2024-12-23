@@ -1,16 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
   experimental: {
-    appDir: true,
+    serverActions: true
   },
-  theme: {
-    extend: {
-      colors: {
-        background: '#1a1a1a',
-        foreground: '#ffffff',
-      },
-    },
+  output: 'standalone',
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+      };
+    }
+    return config;
   },
 }
 

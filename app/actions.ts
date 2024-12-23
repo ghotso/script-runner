@@ -9,7 +9,7 @@ const execAsync = promisify(exec);
 
 const getScriptsFilePath = () => {
   return process.env.NODE_ENV === 'production'
-    ? process.env.SCRIPTS_PATH
+    ? process.env.SCRIPTS_PATH || '/data/scripts.json'
     : path.join(process.cwd(), 'data', 'scripts.json');
 };
 
@@ -19,12 +19,12 @@ async function getScripts() {
   return JSON.parse(fileContents);
 }
 
-async function saveScripts(scripts) {
+async function saveScripts(scripts: any) {
   const filePath = getScriptsFilePath();
   await fs.writeFile(filePath, JSON.stringify(scripts, null, 2));
 }
 
-export async function addScript(script) {
+export async function addScript(script: any) {
   const data = await getScripts();
   
   const newScript = {
@@ -38,47 +38,54 @@ export async function addScript(script) {
   await saveScripts(data);
 }
 
-export async function updateScript(scriptId, content) {
+export async function updateScript(scriptId: string, content: string) {
   const data = await getScripts();
-  const script = data.scripts.find(s => s.id === scriptId);
+  const script = data.scripts.find((s: any) => s.id === scriptId);
   if (script) {
     script.content = content;
     await saveScripts(data);
   }
 }
 
-export async function updateRequirements(scriptId, requirements) {
+export async function updateRequirements(scriptId: string, requirements: string[]) {
   const data = await getScripts();
-  const script = data.scripts.find(s => s.id === scriptId);
+  const script = data.scripts.find((s: any) => s.id === scriptId);
   if (script) {
     script.requirements = requirements;
     await saveScripts(data);
   }
 }
 
-export async function installRequirements(scriptId) {
+export async function installRequirements(scriptId: string) {
   const data = await getScripts();
-  const script = data.scripts.find(s => s.id === scriptId);
+  const script = data.scripts.find((s: any) => s.id === scriptId);
   if (script && script.requirements.length > 0) {
-    // In a real-world scenario, you would execute pip install here
     console.log(`Installing requirements for script ${scriptId}: ${script.requirements.join(', ')}`);
-    // Simulate installation delay
     await new Promise(resolve => setTimeout(resolve, 2000));
   }
 }
 
-export async function updateSchedule(scriptId, schedule) {
+export async function updateSchedule(scriptId: string, schedule: string) {
   const data = await getScripts();
-  const script = data.scripts.find(s => s.id === scriptId);
+  const script = data.scripts.find((s: any) => s.id === scriptId);
   if (script) {
     script.schedule = schedule;
     await saveScripts(data);
   }
 }
 
-export async function runScript(scriptId) {
+export async function updateTags(scriptId: string, tags: string[]) {
   const data = await getScripts();
-  const script = data.scripts.find(s => s.id === scriptId);
+  const script = data.scripts.find((s: any) => s.id === scriptId);
+  if (script) {
+    script.tags = tags;
+    await saveScripts(data);
+  }
+}
+
+export async function runScript(scriptId: string) {
+  const data = await getScripts();
+  const script = data.scripts.find((s: any) => s.id === scriptId);
   
   if (!script) {
     throw new Error('Script not found');
@@ -97,15 +104,14 @@ export async function runScript(scriptId) {
     } else {
       throw new Error('Unsupported script type');
     }
-  } catch (error) {
+  } catch (error: any) {
     status = 'Failed';
     output = error.message;
   }
 
   const endTime = new Date();
-  const duration = endTime - startTime;
+  const duration = endTime.getTime() - startTime.getTime();
 
-  // Log the execution
   script.logs.push({
     timestamp: startTime.toISOString(),
     status: status,
@@ -113,7 +119,6 @@ export async function runScript(scriptId) {
     output: output
   });
   
-  // Keep only the last 10 logs
   script.logs = script.logs.slice(-10);
   
   await saveScripts(data);
@@ -121,7 +126,7 @@ export async function runScript(scriptId) {
   return output;
 }
 
-async function executePythonScript(content) {
+async function executePythonScript(content: string) {
   const tempScriptPath = path.join('/tmp', `script_${Date.now()}.py`);
   await fs.writeFile(tempScriptPath, content);
   try {
@@ -135,7 +140,7 @@ async function executePythonScript(content) {
   }
 }
 
-async function executeBashScript(content) {
+async function executeBashScript(content: string) {
   const tempScriptPath = path.join('/tmp', `script_${Date.now()}.sh`);
   await fs.writeFile(tempScriptPath, content);
   await fs.chmod(tempScriptPath, '755');

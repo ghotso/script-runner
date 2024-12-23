@@ -1,10 +1,16 @@
-'use client'
+"use client"
 
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
+import { Play, Loader2 } from 'lucide-react';
 import { runScript } from '../../actions';
+import { type Script } from '@/types/script';
 
-export default function ScriptRunner({ script }) {
+interface ScriptRunnerProps {
+  script: Script;
+}
+
+export default function ScriptRunner({ script }: ScriptRunnerProps) {
   const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
 
@@ -21,14 +27,28 @@ export default function ScriptRunner({ script }) {
   };
 
   return (
-    <div className="mt-4">
-      <Button onClick={handleRun} disabled={isRunning}>
-        {isRunning ? 'Running...' : 'Run Script'}
+    <div>
+      <Button 
+        onClick={handleRun} 
+        disabled={isRunning}
+        className="w-32"
+      >
+        {isRunning ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Running
+          </>
+        ) : (
+          <>
+            <Play className="mr-2 h-4 w-4" />
+            Run Script
+          </>
+        )}
       </Button>
       {output && (
         <div className="mt-4">
-          <h3 className="text-lg font-semibold">Output:</h3>
-          <pre className="bg-gray-900 p-2 rounded mt-2 overflow-x-auto whitespace-pre-wrap">
+          <h3 className="text-lg font-semibold text-white">Output:</h3>
+          <pre className="bg-gray-900 text-white p-2 rounded mt-2 overflow-x-auto whitespace-pre-wrap">
             {output}
           </pre>
         </div>

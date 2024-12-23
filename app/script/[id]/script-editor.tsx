@@ -1,7 +1,7 @@
-'use client'
+"use client"
 
 import { useState } from 'react';
-import { Button } from "@/components/ui/button";
+import { Button } from "../../../components/ui/button";
 import { updateScript } from '../../actions';
 import dynamic from 'next/dynamic';
 
@@ -25,10 +25,12 @@ export default function ScriptEditor({ script }) {
         padding={15}
         style={{
           fontSize: 12,
-          backgroundColor: "#1E1E1E",
+          backgroundColor: "#2D2D2D",
           fontFamily: 'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',
         }}
         className="mt-2 rounded"
+        data-color-mode="dark"
+        data-line-numbers="true"
       />
       <Button onClick={handleUpdate} className="mt-2">Update Script</Button>
     </div>

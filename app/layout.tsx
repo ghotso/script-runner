@@ -1,6 +1,7 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
-import Sidebar from './components/sidebar'
+import Link from 'next/link'
+import { Home } from 'lucide-react'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -16,13 +17,35 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} bg-gray-900 text-white`}>
-        <div className="flex h-screen">
-          <Sidebar />
-          <main className="flex-1 overflow-y-auto p-4">
-            {children}
-          </main>
-        </div>
+      <body className={`${inter.className} min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-black text-foreground`}>
+        <div className="fixed inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
+        <nav className="relative border-b border-white/10 bg-white/5 backdrop-blur-md">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <Link href="/" className="text-xl font-bold text-white">
+                Script Runner
+              </Link>
+              <div className="flex items-center gap-4">
+                <Link 
+                  href="/" 
+                  className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
+                >
+                  <Home className="w-5 h-5" />
+                  Home
+                </Link>
+                <Link 
+                  href="/add-script"
+                  className="text-white/70 hover:text-white transition-colors"
+                >
+                  Add New Script
+                </Link>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <main className="relative container mx-auto py-6 px-4">
+          {children}
+        </main>
       </body>
     </html>
   )

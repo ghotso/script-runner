@@ -4,64 +4,117 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Save } from 'lucide-react';
 import { addScript } from '../actions';
+import { TagEditor } from '@/components/tag-editor';
+import dynamic from 'next/dynamic';
+
+const CodeEditor = dynamic(() => import('@uiw/react-textarea-code-editor').then((mod) => mod.default), { ssr: false });
 
 export default function AddScript() {
   const [name, setName] = useState('');
   const [type, setType] = useState('python');
   const [content, setContent] = useState('');
   const [requirements, setRequirements] = useState('');
-  const [tags, setTags] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
   const router = useRouter();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await addScript({
       name,
       type,
       content,
       requirements: requirements.split('\n').filter(r => r.trim() !== ''),
-      tags: tags.split(',').map(t => t.trim()).filter(t => t !== '')
+      tags
     });
     router.push('/');
   };
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Add New Script</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <Label htmlFor="name">Name</Label>
-          <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
-        </div>
-        <div>
-          <Label htmlFor="type">Type</Label>
-          <select
-            id="type"
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-            className="w-full p-2 border rounded"
-          >
-            <option value="python">Python</option>
-            <option value="bash">Bash</option>
-          </select>
-        </div>
-        <div>
-          <Label htmlFor="content">Script Content</Label>
-          <Textarea id="content" value={content} onChange={(e) => setContent(e.target.value)} required />
-        </div>
-        <div>
-          <Label htmlFor="requirements">Requirements (one per line)</Label>
-          <Textarea id="requirements" value={requirements} onChange={(e) => setRequirements(e.target.value)} />
-        </div>
-        <div>
-          <Label htmlFor="tags">Tags (comma-separated)</Label>
-          <Input id="tags" value={tags} onChange={(e) => setTags(e.target.value)} />
-        </div>
-        <Button type="submit">Add Script</Button>
-      </form>
+      <Card className="max-w-4xl mx-auto backdrop-blur-md bg-white/10 border-white/20">
+        <CardHeader>
+          <CardTitle className="text-2xl text-white">Add New Script</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <Label htmlFor="name" className="text-white">Name</Label>
+              <Input 
+                id="name" 
+                value={name} 
+                onChange={(e) => setName(e.target.value)} 
+                required 
+                className="bg-white/5 border-white/10 focus:border-white/20"
+              />
+            </div>
+            <div>
+              <Label htmlFor="type" className="text-white">Type</Label>
+              <Select
+                id="type"
+                value={type}
+                onValueChange={setType}
+                className="bg-white/5 border-white/10"
+              >
+                <option value="python">Python</option>
+                <option value="bash">Bash</option>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="content" className="text-white">Script Content</Label>
+              <div className="mt-1.5">
+                <CodeEditor
+                  value={content}
+                  language={type === 'python' ? 'python' : 'shell'}
+                  placeholder="Enter your script content here..."
+                  onChange={(evn) => setContent(evn.target.value)}
+                  padding={15}
+                  style={{
+                    fontSize: 12,
+                    backgroundColor: "#2D2D2D",
+                    fontFamily: 'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',
+                  }}
+                  className="rounded-md"
+                  data-color-mode="dark"
+                  data-line-numbers="true"
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="requirements" className="text-white">Requirements (one per line)</Label>
+              <div className="mt-1.5">
+                <CodeEditor
+                  value={requirements}
+                  language="python"
+                  placeholder="Enter your requirements here..."
+                  onChange={(evn) => setRequirements(evn.target.value)}
+                  padding={15}
+                  style={{
+                    fontSize: 12,
+                    backgroundColor: "#2D2D2D",
+                    fontFamily: 'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',
+                  }}
+                  className="rounded-md"
+                  data-color-mode="dark"
+                  data-line-numbers="true"
+                />
+              </div>
+            </div>
+            <div>
+              <Label className="text-white">Tags</Label>
+              <TagEditor tags={tags} onTagsChange={setTags} />
+            </div>
+            <Button type="submit" className="w-full">
+              <Save className="mr-2 h-4 w-4" />
+              Add Script
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

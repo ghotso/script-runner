@@ -1,7 +1,7 @@
-'use client'
+"use client"
 
 import { useState } from 'react';
-import { Button } from "@/components/ui/button";
+import { Button } from "../../../components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "../../../components/ui/dialog"
 
 export default function LogViewer({ logs }) {
   const [selectedLog, setSelectedLog] = useState(null);
@@ -25,11 +25,11 @@ export default function LogViewer({ logs }) {
             <li key={index}>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="link" className="p-0 text-blue-400 hover:underline" onClick={() => setSelectedLog(log)}>
+                  <Button variant="link" className="p-0 text-blue-500 hover:underline" onClick={() => setSelectedLog(log)}>
                     {new Date(log.timestamp).toLocaleString()}: {log.status}
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="bg-gray-800 text-white">
+                <DialogContent className="bg-white dark:bg-gray-800">
                   <DialogHeader>
                     <DialogTitle>Log Details</DialogTitle>
                     <DialogDescription>
@@ -40,7 +40,7 @@ export default function LogViewer({ logs }) {
                     <p><strong>Status:</strong> {log.status}</p>
                     <p><strong>Duration:</strong> {log.duration}ms</p>
                     <h4 className="text-lg font-semibold mt-2">Output:</h4>
-                    <pre className="bg-gray-900 p-2 rounded mt-1 overflow-x-auto">
+                    <pre className="bg-gray-100 dark:bg-gray-700 p-2 rounded mt-1 overflow-x-auto">
                       {log.output}
                     </pre>
                   </div>

@@ -1,23 +1,36 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { notFound } from 'next/navigation';
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Save } from 'lucide-react';
 import ScriptEditor from './script-editor';
 import RequirementsEditor from './requirements-editor';
 import ScheduleManager from './schedule-manager';
 import LogViewer from './log-viewer';
 import ScriptRunner from './script-runner';
+import TagEditor from './tag-editor';
+import { type Script } from '@/types/script';
 
-async function getScript(id) {
+async function getScript(id: string): Promise<Script | null> {
   const filePath = path.join(process.cwd(), 'data', 'scripts.json');
-  const fileContents = await fs.readFile(filePath, 'utf8');
-  const scripts = JSON.parse(fileContents).scripts;
-  return scripts.find(script => script.id === id);
+  try {
+    const fileContents = await fs.readFile(filePath, 'utf8');
+    const scripts = JSON.parse(fileContents).scripts as Script[];
+    return scripts.find(script => script.id === id) || null;
+  } catch (error) {
+    console.error('Error reading script file:', error);
+    return null;
+  }
 }
 
-export default async function ScriptDetail({ params }) {
-  const script = await getScript(params.id);
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default async function ScriptDetail({ params }: PageProps) {
+  const { id } = await params;
+  const script = await getScript(id);
 
   if (!script) {
     notFound();
@@ -25,24 +38,29 @@ export default async function ScriptDetail({ params }) {
 
   return (
     <div className="container mx-auto p-4">
-      <Card className="bg-gray-800 text-white">
-        <CardHeader>
-          <CardTitle>{script.name}</CardTitle>
+      <Card className="bg-card text-card-foreground backdrop-blur-md bg-white/10 border-white/20">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-2xl text-white">{script.name}</CardTitle>
+            <p className="text-sm text-white/70 mt-1">Type: {script.type}</p>
+          </div>
+          <div className="flex gap-2">
+            <ScriptRunner script={script} />
+            <Button variant="secondary">
+              <Save className="mr-2 h-4 w-4" />
+              Save Changes
+            </Button>
+          </div>
         </CardHeader>
-        <CardContent>
-          <p>Type: {script.type}</p>
-          <div className="mt-2">
-            {script.tags.map((tag) => (
-              <Badge key={tag} variant="secondary" className="mr-1">
-                {tag}
-              </Badge>
-            ))}
+        <CardContent className="space-y-6">
+          <div>
+            <h3 className="text-lg font-semibold text-white mb-2">Tags</h3>
+            <TagEditor script={script} />
           </div>
           <ScriptEditor script={script} />
           <RequirementsEditor script={script} />
           <ScheduleManager script={script} />
-          <ScriptRunner script={script} />
-          <LogViewer logs={script.logs} />
+          <LogViewer logs={script.logs || []} />
         </CardContent>
       </Card>
     </div>
