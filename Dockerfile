@@ -9,8 +9,8 @@ RUN apk add --no-cache python3 py3-pip make g++
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies and update lock file
+RUN npm install
 
 # Copy source
 COPY . .
