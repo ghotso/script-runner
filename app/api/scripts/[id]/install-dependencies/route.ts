@@ -25,7 +25,8 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
     let command
     if (script.type === 'Python') {
-      command = `pip install -r ${requirementsPath}`
+      // Use the virtual environment's pip to install dependencies
+      command = `${process.env.VIRTUAL_ENV}/bin/pip install -r ${requirementsPath}`
     } else if (script.type === 'Bash') {
       // For Bash scripts, we'll assume the dependencies are actually shell commands to install packages
       command = script.dependencies
@@ -40,13 +41,13 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
     if (stderr) {
       console.error('Error installing dependencies:', stderr)
-      return NextResponse.json({ error: 'Failed to install dependencies' }, { status: 500 })
+      return NextResponse.json({ error: 'Failed to install dependencies', details: stderr }, { status: 500 })
     }
 
     return NextResponse.json({ message: 'Dependencies installed successfully', output: stdout })
   } catch (error) {
     console.error('Error installing dependencies:', error)
-    return NextResponse.json({ error: 'Failed to install dependencies' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to install dependencies', details: error }, { status: 500 })
   }
 }
 
