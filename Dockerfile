@@ -35,7 +35,11 @@ WORKDIR /app
 ENV NODE_ENV production
 
 # Install Python and other necessary tools
-RUN apk add --no-cache python3 py3-pip
+RUN apk add --no-cache python3 py3-pip && \
+    pip3 install --upgrade pip && \
+    mkdir -p /home/nextjs/.local/bin && \
+    ln -s /usr/bin/python3 /usr/bin/python && \
+    echo 'export PATH="/home/nextjs/.local/bin:$PATH"' >> /home/nextjs/.profile
 
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs && \
@@ -57,14 +61,15 @@ COPY --chown=nextjs:nodejs data/scripts.json /data/scripts.json
 # Switch to non-root user
 USER nextjs
 
+# Set environment variables
+ENV PATH="/home/nextjs/.local/bin:$PATH"
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+ENV SCRIPTS_PATH="/data/scripts.json"
+ENV PYTHON_PATH="/usr/bin/python3"
+
 # Expose port
 EXPOSE 3000
-
-# Set environment variables
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
-ENV SCRIPTS_PATH "/data/scripts.json"
-ENV PYTHON_PATH "/usr/bin/python3"
 
 # Start the application
 CMD ["node", "server.js"]

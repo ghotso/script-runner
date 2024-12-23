@@ -20,7 +20,7 @@ export default function SettingsCard({ script }: SettingsCardProps) {
         <div>
           <h3 className="text-sm font-semibold text-white mb-2 flex items-center">
             <Tag className="w-4 h-4 mr-2" />
-            Tags
+            Manage Tags
           </h3>
           <TagEditor script={script} />
         </div>

@@ -39,7 +39,6 @@ export default function TagEditor({ script }: TagEditorProps) {
 
   return (
     <div>
-      <h3 className="text-lg font-semibold">Tags:</h3>
       <div className="flex flex-wrap gap-2 mb-2">
         {tags.map((tag) => (
           <Badge key={tag} variant={getTagColor(tag) as any} className="px-2 py-1">
