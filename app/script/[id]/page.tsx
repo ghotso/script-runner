@@ -43,10 +43,7 @@ export default async function ScriptDetail({ params }: Props) {
           </div>
           <div className="flex gap-2">
             <Suspense fallback={<div>Loading...</div>}>
-              <ScriptRunner script={script} onScriptRun={() => {
-                // This will trigger a re-render of the LogViewer component
-                // You might need to implement a state management solution or use Server Components for real-time updates
-              }} />
+              <ScriptRunner script={script} />
             </Suspense>
             <DeleteScriptButton scriptId={script.id} />
           </div>

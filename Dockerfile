@@ -69,6 +69,9 @@ COPY --chown=nextjs:nodejs data/scripts.json /data/scripts.json
 COPY --chown=nextjs:nodejs start.sh ./
 RUN chmod +x start.sh
 
+# Create .next directory and set permissions
+RUN mkdir -p .next/cache && chown -R nextjs:nodejs .next
+
 # Switch to non-root user
 USER nextjs
 
