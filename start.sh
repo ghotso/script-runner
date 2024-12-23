@@ -12,11 +12,11 @@ log_message() {
 # Ensure log directories exist and have correct permissions
 if [ ! -d "/data/logs" ] || [ ! -d "/data/logs/runs" ]; then
   log_message "Creating log directories..."
-  mkdir -p /data/logs /data/logs/runs || log_message "Failed to create log directories"
+  sudo mkdir -p /data/logs /data/logs/runs || log_message "Failed to create log directories"
 fi
 
 log_message "Setting permissions for log directories..."
-chmod -R 755 /data/logs /data/logs/runs || log_message "Failed to set permissions for log directories"
+sudo chmod -R 755 /data/logs /data/logs/runs || log_message "Failed to set permissions for log directories"
 
 log_message "Log directories created and permissions set"
 
@@ -39,7 +39,7 @@ install_requirements() {
                     log_message "$req is already installed."
                 else
                     log_message "Installing: $req"
-                    if sudo -H pip3 install --no-cache-dir "$req"; then
+                    if pip3 install --user --no-cache-dir "$req"; then
                         log_message "$req installed successfully."
                     else
                         log_message "Error: Failed to install $req"
@@ -66,5 +66,5 @@ sudo crond -f &
 
 # Start the application
 log_message "Starting Node.js application..."
-exec sudo -E node server.js
+exec node server.js
 

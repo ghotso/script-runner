@@ -53,7 +53,7 @@ export async function installRequirements(scriptId: string) {
   if (script && script.requirements.length > 0) {
     console.log(`Installing requirements for script ${scriptId}: ${script.requirements.join(', ')}`);
     try {
-      const { stdout, stderr } = await execAsync(`sudo -H pip3 install --no-cache-dir ${script.requirements.join(' ')}`);
+      const { stdout, stderr } = await execAsync(`pip3 install --user --no-cache-dir ${script.requirements.join(' ')}`);
       
       if (stderr) {
         console.error('Error installing requirements:', stderr);

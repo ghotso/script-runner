@@ -33,7 +33,7 @@ RUN npm run build
 # Production stage
 FROM node:18.18.0-alpine AS runner
 
-WORKDIR /home/scriptrunner/app
+WORKDIR /app
 
 ENV NODE_ENV production
 
@@ -41,25 +41,20 @@ ENV NODE_ENV production
 RUN apk add --no-cache python3 py3-pip jq make g++ dcron bash sudo && \
     python3 -m ensurepip && \
     pip3 install --no-cache-dir --upgrade pip setuptools wheel && \
-    mkdir -p /home/nextjs/.local/bin && \
-    chown -R root:root /home/nextjs && \
+    mkdir -p /home/scriptrunner/.local/bin && \
     # Remove existing python symlink if it exists
     rm -f /usr/bin/python && \
     # Create new symlink
-    ln -s /usr/bin/python3 /usr/bin/python && \
-    # Install pip packages globally to avoid permission issues
-    pip3 install --no-cache-dir --upgrade pip && \
-    # Set PATH for all users
-    echo 'export PATH="/home/nextjs/.local/bin:$PATH"' >> /etc/profile
+    ln -s /usr/bin/python3 /usr/bin/python
 
 # Create non-root user
 RUN adduser -D scriptrunner && \
     echo "scriptrunner ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/scriptrunner && \
     chmod 0440 /etc/sudoers.d/scriptrunner
 
-RUN sudo mkdir -p /data /data/logs /data/logs/runs && \
-    sudo chown -R scriptrunner:scriptrunner /data && \
-    sudo chmod -R 755 /data
+RUN mkdir -p /data /data/logs /data/logs/runs && \
+    chown -R scriptrunner:scriptrunner /data /app /home/scriptrunner && \
+    chmod -R 755 /data
 
 # Create data volume
 VOLUME /data
@@ -91,14 +86,14 @@ RUN echo "0 0 * * * /usr/bin/find /data/logs -type f -mtime +7 -delete" > /etc/c
 USER scriptrunner
 
 # Set environment variables
-ENV PATH="/home/nextjs/.local/bin:$PATH"
+ENV PATH="/home/scriptrunner/.local/bin:$PATH"
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 ENV SCRIPTS_PATH="/data/scripts.json"
 ENV PYTHON_PATH="/usr/bin/python3"
 ENV LOGS_PATH="/data/logs"
 ENV RUNS_LOGS_PATH="/data/logs/runs"
-ENV PIP_USER=false
+ENV PIP_USER=true
 
 # Expose port
 EXPOSE 3000
