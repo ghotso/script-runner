@@ -71,20 +71,6 @@ Optional:
    npm run dev
    ```
 
-## Nutzung
-
-1. **Erstellen eines Skripts**:
-   - Navigieren Sie zur Seite "Neue Skripte".
-   - Wählen Sie den Skripttyp (Python oder Bash) und geben Sie den Skriptcode ein.
-   - Speichern Sie das Skript.
-
-2. **Planen eines Skripts**:
-   - Gehen Sie zur Seite "Zeitplan".
-   - Wählen Sie ein Skript und geben Sie einen Cron-Ausdruck für den Zeitplan ein.
-
-3. **Logs anzeigen**:
-   - Öffnen Sie die Seite "Logs", um Protokolle früherer Ausführungen zu sehen.
-
 ## Beispiele
 
 ### Beispiel-Python-Skript

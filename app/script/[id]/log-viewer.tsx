@@ -37,7 +37,7 @@ export default function LogViewer({ scriptId }: LogViewerProps) {
       }
     } catch (error) {
       console.error('Error fetching logs:', error);
-      setError('Failed to fetch logs');
+      setError('Failed to fetch logs. Please try again later.');
     } finally {
       setIsLoading(false);
     }
@@ -68,7 +68,18 @@ export default function LogViewer({ scriptId }: LogViewerProps) {
   }
 
   if (error) {
-    return <div className="text-center py-8 text-red-500">{error}</div>;
+    return (
+      <div className="text-center py-8 bg-red-100 border border-red-400 text-red-700 rounded">
+        <p className="font-bold">Error:</p>
+        <p>{error}</p>
+        <button
+          onClick={fetchLogs}
+          className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+        >
+          Retry
+        </button>
+      </div>
+    );
   }
 
   return (
