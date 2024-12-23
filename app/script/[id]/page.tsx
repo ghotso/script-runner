@@ -62,10 +62,12 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
     setIsRunning(true)
     try {
       const response = await fetch(`/api/scripts/${script.id}/run`, { method: 'POST' })
-      if (!response.ok) {
-        throw new Error('Failed to run script')
-      }
       const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to run script')
+      }
+
       setScript(prevScript => {
         if (!prevScript) return null
         return {
@@ -73,10 +75,15 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
           executions: [data.execution, ...prevScript.executions].slice(0, 10)
         }
       })
-      toast.success('Script executed successfully!')
+
+      if (data.execution.status === 'success') {
+        toast.success('Script executed successfully!')
+      } else {
+        toast.error('Script execution failed. Check the logs for details.')
+      }
     } catch (error) {
       console.error('Error running script:', error)
-      toast.error('Failed to execute script')
+      toast.error(error instanceof Error ? error.message : 'Failed to execute script')
     } finally {
       setIsRunning(false)
     }
@@ -158,14 +165,17 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
     setIsInstallingDependencies(true)
     try {
       const response = await fetch(`/api/scripts/${script.id}/install-dependencies`, { method: 'POST' })
-      if (!response.ok) {
-        throw new Error('Failed to install dependencies')
-      }
       const data = await response.json()
-      toast.success(data.message)
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to install dependencies')
+      }
+
+      // Show the detailed message from the server if available
+      toast.success(data.message || 'Dependencies installed successfully!')
     } catch (error) {
       console.error('Error installing dependencies:', error)
-      toast.error('Failed to install dependencies')
+      toast.error(error instanceof Error ? error.message : 'Failed to install dependencies')
     } finally {
       setIsInstallingDependencies(false)
     }

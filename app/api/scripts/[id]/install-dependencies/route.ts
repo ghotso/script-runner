@@ -39,15 +39,24 @@ export async function POST(request: Request, { params }: { params: { id: string 
     // Clean up
     await fs.rm(tempDir, { recursive: true, force: true })
 
-    if (stderr) {
+    if (stderr && !stderr.includes('WARNING')) { // Ignore pip warnings
       console.error('Error installing dependencies:', stderr)
-      return NextResponse.json({ error: 'Failed to install dependencies', details: stderr }, { status: 500 })
+      return NextResponse.json({ 
+        error: 'Failed to install dependencies', 
+        details: stderr 
+      }, { status: 500 })
     }
 
-    return NextResponse.json({ message: 'Dependencies installed successfully', output: stdout })
+    return NextResponse.json({ 
+      message: 'Dependencies installed successfully!',
+      details: stdout
+    })
   } catch (error) {
     console.error('Error installing dependencies:', error)
-    return NextResponse.json({ error: 'Failed to install dependencies', details: error }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Failed to install dependencies', 
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 })
   }
 }
 
