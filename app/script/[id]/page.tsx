@@ -7,7 +7,7 @@ import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { Play, Trash2, Clock, Save, Plus, Download, CheckCircle, XCircle, Loader, X, Timer, FileCode, Terminal, Tag } from 'lucide-react'
-import { toast, ToastContainer } from 'react-toastify'
+import { Slide, ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { translateCronSchedule } from '../../utils/cron'
 
@@ -50,7 +50,7 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
         setScript(data)
       } catch (error) {
         console.error('Error fetching script:', error)
-        toast.error('Failed to load script')
+        toast.error('Failed to load script', { transition: Slide })
       }
     }
 
@@ -77,13 +77,13 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
       })
 
       if (data.execution.status === 'success') {
-        toast.success('Script executed successfully!')
+        toast.success('Script executed successfully!', { transition: Slide })
       } else {
-        toast.error('Script execution failed. Check the logs for details.')
+        toast.error('Script execution failed. Check the logs for details.', { transition: Slide })
       }
     } catch (error) {
       console.error('Error running script:', error)
-      toast.error(error instanceof Error ? error.message : 'Failed to execute script')
+      toast.error(error instanceof Error ? error.message : 'Failed to execute script', { transition: Slide })
     } finally {
       setIsRunning(false)
     }
@@ -96,11 +96,11 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
       if (!response.ok) {
         throw new Error('Failed to delete script')
       }
-      toast.success('Script deleted successfully!')
+      toast.success('Script deleted successfully!', { transition: Slide })
       router.push('/')
     } catch (error) {
       console.error('Error deleting script:', error)
-      toast.error('Failed to delete script')
+      toast.error('Failed to delete script', { transition: Slide })
     }
   }
 
@@ -115,10 +115,10 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
       if (!response.ok) {
         throw new Error('Failed to save script')
       }
-      toast.success('Script saved successfully!')
+      toast.success('Script saved successfully!', { transition: Slide })
     } catch (error) {
       console.error('Error saving script:', error)
-      toast.error('Failed to save script')
+      toast.error('Failed to save script', { transition: Slide })
     }
   }
 
@@ -135,7 +135,7 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
     setScript(prev => prev ? { ...prev, tags: updatedTags } : null)
     setNewTag('')
     await saveChanges({ tags: updatedTags })
-    toast.success(`Tag "${newTag}" added successfully!`)
+    toast.success(`Tag "${newTag}" added successfully!`, { transition: Slide })
   }
 
   const handleAddSchedule = async () => {
@@ -144,7 +144,7 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
     setScript(prev => prev ? { ...prev, schedules: updatedSchedules } : null)
     setNewSchedule('')
     await saveChanges({ schedules: updatedSchedules })
-    toast.success(`Schedule "${newSchedule}" added successfully!`)
+    toast.success(`Schedule "${newSchedule}" added successfully!`, { transition: Slide })
   }
 
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>, action: 'tag' | 'schedule') => {
@@ -170,10 +170,10 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
       }
 
       // Show the detailed message from the server if available
-      toast.success(data.message || 'Dependencies installed successfully!')
+      toast.success(data.message || 'Dependencies installed successfully!', { transition: Slide })
     } catch (error) {
       console.error('Error installing dependencies:', error)
-      toast.error(error instanceof Error ? error.message : 'Failed to install dependencies')
+      toast.error(error instanceof Error ? error.message : 'Failed to install dependencies', { transition: Slide })
     } finally {
       setIsInstallingDependencies(false)
     }
@@ -184,7 +184,7 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
     const updatedTags = script.tags.filter(tag => tag !== tagToDelete)
     setScript(prev => prev ? { ...prev, tags: updatedTags } : null)
     await saveChanges({ tags: updatedTags })
-    toast.success(`Tag "${tagToDelete}" removed`)
+    toast.success(`Tag "${tagToDelete}" removed`, { transition: Slide })
   }
 
   const handleDeleteSchedule = async (scheduleToDelete: string) => {
@@ -192,7 +192,7 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
     const updatedSchedules = script.schedules.filter(schedule => schedule !== scheduleToDelete)
     setScript(prev => prev ? { ...prev, schedules: updatedSchedules } : null)
     await saveChanges({ schedules: updatedSchedules })
-    toast.success(`Schedule removed`)
+    toast.success(`Schedule removed`, { transition: Slide })
   }
 
   const saveChanges = async (changes: Partial<Script>) => {
@@ -207,7 +207,7 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
       }
     } catch (error) {
       console.error('Error saving changes:', error)
-      toast.error('Failed to save changes')
+      toast.error('Failed to save changes', { transition: Slide })
     }
   }
 
@@ -443,7 +443,18 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
           </div>
         </div>
       )}
-      <ToastContainer position="bottom-right" theme="dark" />
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </div>
   )
 }

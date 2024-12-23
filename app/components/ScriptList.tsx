@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Search, Tag, FileCode, Terminal, CheckCircle, XCircle, Clock } from 'lucide-react'
 import { Input } from './ui/input'
 import Select from 'react-select'
-import { toast, ToastContainer } from 'react-toastify'
+import { Slide, ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { translateCronSchedule } from '../utils/cron'
 
@@ -44,7 +44,7 @@ export default function ScriptList() {
         setScripts(data)
       } catch (error) {
         console.error('Error fetching scripts:', error)
-        toast.error('Failed to load scripts')
+        toast.error('Failed to load scripts', { transition: Slide })
       }
     }
 
@@ -168,7 +168,18 @@ export default function ScriptList() {
           </Link>
         ))}
       </div>
-      <ToastContainer position="bottom-right" theme="dark" />
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </div>
   )
 }
