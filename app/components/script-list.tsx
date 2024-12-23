@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Input } from "../../components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
@@ -8,21 +8,23 @@ import { FileCode, Calendar, Plus } from 'lucide-react'
 import { Tag } from "../../components/ui/tag"
 import { MultiSelect } from "../../components/ui/multi-select"
 import { getTagColor } from '../../utils/tag-colors'
+import { Script } from '@/types/script'
 
-type Script = {
-  id: string
-  name: string
-  type: string
-  tags: string[]
+interface ScriptListProps {
+  initialScripts: Script[]
 }
 
-export default function ScriptList({ initialScripts }: { initialScripts: Script[] }) {
+export default function ScriptList({ initialScripts }: ScriptListProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [scripts, setScripts] = useState<Script[]>(initialScripts)
 
+  useEffect(() => {
+    console.log('Initial scripts:', initialScripts);
+  }, [initialScripts]);
+
   // Get unique tags from all scripts
-  const allTags = Array.from(new Set(initialScripts.flatMap(script => script.tags)))
+  const allTags = Array.from(new Set(scripts.flatMap(script => script.tags)))
     .map(tag => ({ label: tag, value: tag }))
 
   // Filter scripts based on search term and selected tags
