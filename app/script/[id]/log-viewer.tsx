@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -9,16 +9,29 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Log } from '@/types/script';
+import { Log, Script } from '@/types/script';
 import { format, formatDistanceToNow } from 'date-fns';
 import { CheckCircle2, XCircle, Clock, Terminal } from 'lucide-react';
+import { getScript } from '@/lib/scripts';
 
 interface LogViewerProps {
-  logs: Log[];
+  scriptId: string;
 }
 
-export default function LogViewer({ logs }: LogViewerProps) {
+export default function LogViewer({ scriptId }: LogViewerProps) {
+  const [logs, setLogs] = useState<Log[]>([]);
   const [selectedLog, setSelectedLog] = useState<Log | null>(null);
+
+  const fetchLogs = async () => {
+    const script = await getScript(scriptId);
+    if (script) {
+      setLogs(script.logs || []);
+    }
+  };
+
+  useEffect(() => {
+    fetchLogs();
+  }, [scriptId]);
 
   const getStatusIcon = (status: string) => {
     switch (status.toLowerCase()) {

@@ -7,6 +7,7 @@ import { Script } from '@/types/script';
 import { Clock, Plus } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { Badge } from "@/components/ui/badge";
+import { getReadableCronExpression } from '@/utils/cronUtils';
 
 interface ScheduleManagerProps {
   script: Script;
@@ -50,7 +51,7 @@ export default function ScheduleManager({ script }: ScheduleManagerProps) {
       <div className="flex flex-wrap gap-2 mb-2">
         {schedules.map((schedule) => (
           <Badge key={schedule} variant="secondary" className="px-2 py-1">
-            {schedule}
+            <span title={schedule}>{getReadableCronExpression(schedule)}</span>
             <button
               onClick={() => handleRemoveSchedule(schedule)}
               className="ml-2 text-xs font-bold"

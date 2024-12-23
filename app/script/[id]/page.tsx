@@ -8,6 +8,7 @@ import ScriptRunner from './script-runner';
 import DeleteScriptButton from './delete-script-button';
 import { getScript } from '@/lib/scripts';
 import SettingsCard from './settings-card';
+import { Suspense } from 'react';
 
 type Props = {
   params: { id: string }
@@ -17,10 +18,7 @@ type Props = {
 export async function generateMetadata(
   { params, searchParams }: Props
 ): Promise<Metadata> {
-  // read route params
   const id = params.id
-
-  // fetch data
   const script = await getScript(id)
 
   return {
@@ -44,7 +42,12 @@ export default async function ScriptDetail({ params }: Props) {
             <p className="text-sm text-white/70 mt-1">Type: {script.type}</p>
           </div>
           <div className="flex gap-2">
-            <ScriptRunner script={script} />
+            <Suspense fallback={<div>Loading...</div>}>
+              <ScriptRunner script={script} onScriptRun={() => {
+                // This will trigger a re-render of the LogViewer component
+                // You might need to implement a state management solution or use Server Components for real-time updates
+              }} />
+            </Suspense>
             <DeleteScriptButton scriptId={script.id} />
           </div>
         </CardHeader>
@@ -52,7 +55,9 @@ export default async function ScriptDetail({ params }: Props) {
           <SettingsCard script={script} />
           <RequirementsEditor script={script} />
           <ScriptEditor script={script} />
-          <LogViewer logs={script.logs || []} />
+          <Suspense fallback={<div>Loading logs...</div>}>
+            <LogViewer scriptId={script.id} key={Date.now()} />
+          </Suspense>
         </CardContent>
       </Card>
     </div>

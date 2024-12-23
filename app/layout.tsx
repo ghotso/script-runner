@@ -1,7 +1,7 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
 import Link from 'next/link'
-import { Home } from 'lucide-react'
+import { Home, FileCode, Settings } from 'lucide-react'
 import { Toaster } from 'react-hot-toast'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -9,6 +9,13 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata = {
   title: 'Script Runner',
   description: 'Run and manage your scripts',
+  icons: [
+    {
+      rel: 'icon',
+      type: 'image/svg+xml',
+      url: '/favicon.svg',
+    },
+  ],
 }
 
 export default function RootLayout({
@@ -23,7 +30,8 @@ export default function RootLayout({
         <nav className="relative border-b border-white/10 bg-white/5 backdrop-blur-md">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
-              <Link href="/" className="text-xl font-bold text-white">
+              <Link href="/" className="text-xl font-bold text-white flex items-center">
+                <FileCode className="w-6 h-6 mr-2" />
                 Script Runner
               </Link>
               <div className="flex items-center gap-4">
@@ -39,6 +47,13 @@ export default function RootLayout({
                   className="text-white/70 hover:text-white transition-colors"
                 >
                   Add New Script
+                </Link>
+                <Link 
+                  href="/settings"
+                  className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
+                >
+                  <Settings className="w-5 h-5" />
+                  Settings
                 </Link>
               </div>
             </div>

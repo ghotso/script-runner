@@ -8,9 +8,10 @@ import { Script } from '@/types/script';
 
 interface ScriptRunnerProps {
   script: Script;
+  onScriptRun: () => void;
 }
 
-export default function ScriptRunner({ script }: ScriptRunnerProps) {
+export default function ScriptRunner({ script, onScriptRun }: ScriptRunnerProps) {
   const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
 
@@ -24,6 +25,7 @@ export default function ScriptRunner({ script }: ScriptRunnerProps) {
       setOutput(`Error: ${error instanceof Error ? error.message : String(error)}`);
     }
     setIsRunning(false);
+    onScriptRun(); // Call the callback to refresh executions
   };
 
   return (

@@ -5,6 +5,7 @@ import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { Script, Log } from '@/types/script';
+import { Settings } from '@/types/settings';
 
 const execAsync = promisify(exec);
 
@@ -188,6 +189,7 @@ export async function runScript(scriptId: string) {
   } catch (error: any) {
     status = 'Failed';
     output = error.message;
+    await sendDiscordNotification(script, startTime, output);
   }
 
   const endTime = new Date();
@@ -197,11 +199,11 @@ export async function runScript(scriptId: string) {
     timestamp: startTime.toISOString(),
     status: status,
     duration: duration,
-    output: output || 'Script executed successfully with no output' 
+    output: output || 'Script executed successfully with no output'
   };
 
   script.logs.push(newLog);
-  script.logs = script.logs.slice(-12); 
+  script.logs = script.logs.slice(-12);
 
   await saveScripts(scripts);
 
@@ -241,5 +243,88 @@ export async function deleteScript(scriptId: string) {
   const scripts = await getScripts();
   const updatedScripts = scripts.filter((s: Script) => s.id !== scriptId);
   await saveScripts(updatedScripts);
+}
+
+const getSettingsFilePath = () => {
+  return process.env.NODE_ENV === 'production'
+    ? process.env.SETTINGS_PATH || '/data/settings.json'
+    : path.join(process.cwd(), 'data', 'settings.json');
+};
+
+async function ensureSettingsFileExists() {
+  const filePath = getSettingsFilePath();
+  try {
+    await fs.access(filePath);
+  } catch (error) {
+    await fs.writeFile(filePath, JSON.stringify({ discordWebhook: '' }, null, 2));
+  }
+}
+
+export async function getSettings(): Promise<Settings> {
+  await ensureSettingsFileExists();
+  const filePath = getSettingsFilePath();
+  const fileContents = await fs.readFile(filePath, 'utf8');
+  return JSON.parse(fileContents);
+}
+
+export async function updateSettings(settings: Settings) {
+  await ensureSettingsFileExists();
+  const filePath = getSettingsFilePath();
+  await fs.writeFile(filePath, JSON.stringify(settings, null, 2));
+}
+
+async function sendDiscordNotification(script: Script, startTime: Date, output: string) {
+  const settings = await getSettings();
+  if (!settings.discordWebhook) {
+    console.log('Discord webhook not configured. Skipping notification.');
+    return;
+  }
+
+  const embed = {
+    title: `Script Execution Failed: ${script.name}`,
+    color: 0xFF0000, // Red color for error
+    fields: [
+      {
+        name: 'Script ID',
+        value: script.id,
+        inline: true
+      },
+      {
+        name: 'Script Type',
+        value: script.type,
+        inline: true
+      },
+      {
+        name: 'Execution Time',
+        value: startTime.toISOString(),
+        inline: true
+      },
+      {
+        name: 'Error Output',
+        value: output.substring(0, 1024) // Discord has a 1024 character limit for field values
+      }
+    ],
+    timestamp: new Date().toISOString()
+  };
+
+  const payload = {
+    embeds: [embed]
+  };
+
+  try {
+    const response = await fetch(settings.discordWebhook, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      console.error('Failed to send Discord notification:', await response.text());
+    }
+  } catch (error) {
+    console.error('Error sending Discord notification:', error);
+  }
 }
 
