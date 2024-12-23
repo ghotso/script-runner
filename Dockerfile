@@ -38,7 +38,7 @@ WORKDIR /app
 ENV NODE_ENV production
 
 # Install Python and other necessary tools, and set up paths properly
-RUN apk add --no-cache python3 py3-pip jq make g++ && \
+RUN apk add --no-cache python3 py3-pip jq make g++ dcron && \
     mkdir -p /home/nextjs/.local/bin && \
     chown -R root:root /home/nextjs && \
     # Remove existing python symlink if it exists
@@ -85,6 +85,9 @@ RUN chmod +x start.sh
 
 # Create .next directory and set permissions
 RUN mkdir -p .next/cache && chown -R nextjs:nodejs .next
+
+# Set up cron job for log rotation
+RUN echo "0 0 * * * /usr/bin/find /data/logs -type f -mtime +7 -delete" > /etc/crontabs/root
 
 # Switch to non-root user
 USER nextjs
