@@ -129,23 +129,21 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
     })
   }
 
-  const handleAddTag = () => {
+  const handleAddTag = async () => {
     if (!script || !newTag || script.tags.includes(newTag)) return
-    setScript(prev => {
-      if (!prev) return null
-      return { ...prev, tags: [...prev.tags, newTag] }
-    })
+    const updatedTags = [...script.tags, newTag]
+    setScript(prev => prev ? { ...prev, tags: updatedTags } : null)
     setNewTag('')
+    await saveChanges({ tags: updatedTags })
     toast.success(`Tag "${newTag}" added successfully!`)
   }
 
-  const handleAddSchedule = () => {
+  const handleAddSchedule = async () => {
     if (!script || !newSchedule || script.schedules.includes(newSchedule)) return
-    setScript(prev => {
-      if (!prev) return null
-      return { ...prev, schedules: [...prev.schedules, newSchedule] }
-    })
+    const updatedSchedules = [...script.schedules, newSchedule]
+    setScript(prev => prev ? { ...prev, schedules: updatedSchedules } : null)
     setNewSchedule('')
+    await saveChanges({ schedules: updatedSchedules })
     toast.success(`Schedule "${newSchedule}" added successfully!`)
   }
 
@@ -181,22 +179,36 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
     }
   }
 
-  const handleDeleteTag = (tagToDelete: string) => {
+  const handleDeleteTag = async (tagToDelete: string) => {
     if (!script) return
-    setScript(prev => {
-      if (!prev) return null
-      return { ...prev, tags: prev.tags.filter(tag => tag !== tagToDelete) }
-    })
+    const updatedTags = script.tags.filter(tag => tag !== tagToDelete)
+    setScript(prev => prev ? { ...prev, tags: updatedTags } : null)
+    await saveChanges({ tags: updatedTags })
     toast.success(`Tag "${tagToDelete}" removed`)
   }
 
-  const handleDeleteSchedule = (scheduleToDelete: string) => {
+  const handleDeleteSchedule = async (scheduleToDelete: string) => {
     if (!script) return
-    setScript(prev => {
-      if (!prev) return null
-      return { ...prev, schedules: prev.schedules.filter(schedule => schedule !== scheduleToDelete) }
-    })
+    const updatedSchedules = script.schedules.filter(schedule => schedule !== scheduleToDelete)
+    setScript(prev => prev ? { ...prev, schedules: updatedSchedules } : null)
+    await saveChanges({ schedules: updatedSchedules })
     toast.success(`Schedule removed`)
+  }
+
+  const saveChanges = async (changes: Partial<Script>) => {
+    try {
+      const response = await fetch(`/api/scripts/${script!.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(changes)
+      })
+      if (!response.ok) {
+        throw new Error('Failed to save changes')
+      }
+    } catch (error) {
+      console.error('Error saving changes:', error)
+      toast.error('Failed to save changes')
+    }
   }
 
   if (!script) {
@@ -223,10 +235,6 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
                 Run Script
               </>
             )}
-          </Button>
-          <Button onClick={handleSave}>
-            <Save className="mr-2 h-4 w-4" />
-            Save Changes
           </Button>
           <Button onClick={handleInstallDependencies} disabled={isInstallingDependencies}>
             {isInstallingDependencies ? (
