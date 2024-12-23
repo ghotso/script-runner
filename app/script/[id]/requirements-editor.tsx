@@ -28,9 +28,13 @@ export default function RequirementsEditor({ script }: RequirementsEditorProps) 
 
   const handleInstall = async () => {
     setIsInstalling(true);
-    await installRequirements(script.id);
+    const result = await installRequirements(script.id);
     setIsInstalling(false);
-    toast.success('Requirements installed successfully');
+    if (result.success) {
+      toast.success(result.message);
+    } else {
+      toast.error(result.message);
+    }
   };
 
   return (

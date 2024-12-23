@@ -98,8 +98,25 @@ export async function installRequirements(scriptId: string) {
   const script = data.scripts.find((s: Script) => s.id === scriptId);
   if (script && script.requirements.length > 0) {
     console.log(`Installing requirements for script ${scriptId}: ${script.requirements.join(', ')}`);
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      const requirementsFile = path.join('/tmp', `requirements_${scriptId}.txt`);
+      await fs.writeFile(requirementsFile, script.requirements.join('\n'));
+      
+      const { stdout, stderr } = await execAsync(`${process.env.PYTHON_PATH || 'python3'} -m pip install -r ${requirementsFile}`);
+      
+      if (stderr) {
+        console.error('Error installing requirements:', stderr);
+        return { success: false, message: 'Failed to install requirements. Check the logs for more details.' };
+      }
+      
+      console.log('Requirements installed successfully:', stdout);
+      return { success: true, message: 'Requirements installed successfully.' };
+    } catch (error) {
+      console.error('Error installing requirements:', error);
+      return { success: false, message: 'An error occurred while installing requirements.' };
+    }
   }
+  return { success: true, message: 'No requirements to install.' };
 }
 
 export async function updateSchedule(scriptId: string, schedule: string) {

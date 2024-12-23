@@ -3,11 +3,14 @@ FROM node:18.17.0-alpine AS builder
 
 WORKDIR /app
 
+# Install Python and build dependencies
+RUN apk add --no-cache python3 py3-pip make g++
+
 # Copy package files
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci
 
 # Copy source
 COPY . .
@@ -24,14 +27,15 @@ RUN npm run typecheck
 # Build application
 RUN npm run build
 
-RUN apk add --no-cache python3
-
 # Production stage
 FROM node:18.17.0-alpine AS runner
 
 WORKDIR /app
 
 ENV NODE_ENV production
+
+# Install Python and other necessary tools
+RUN apk add --no-cache python3 py3-pip
 
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs && \
@@ -61,8 +65,6 @@ ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
 ENV SCRIPTS_PATH "/data/scripts.json"
 ENV PYTHON_PATH "/usr/bin/python3"
-
-RUN apk add --no-cache python3
 
 # Start the application
 CMD ["node", "server.js"]
