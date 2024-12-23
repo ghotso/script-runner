@@ -1,18 +1,23 @@
 "use client"
 
 import { useState } from 'react';
-import { Button } from "../../../components/ui/button";
+import { Button } from "@/components/ui/button";
 import { updateRequirements, installRequirements } from '../../actions';
 import dynamic from 'next/dynamic';
+import { Script } from '@/types/script';
 
 const CodeEditor = dynamic(() => import('@uiw/react-textarea-code-editor').then((mod) => mod.default), { ssr: false });
 
-export default function RequirementsEditor({ script }) {
+interface RequirementsEditorProps {
+  script: Script;
+}
+
+export default function RequirementsEditor({ script }: RequirementsEditorProps) {
   const [requirements, setRequirements] = useState(script.requirements.join('\n'));
   const [isInstalling, setIsInstalling] = useState(false);
 
   const handleUpdate = async () => {
-    await updateRequirements(script.id, requirements.split('\n').filter(r => r.trim() !== ''));
+    await updateRequirements(script.id, requirements.split('\n').filter((r: string) => r.trim() !== ''));
   };
 
   const handleInstall = async () => {

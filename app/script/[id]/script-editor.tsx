@@ -1,13 +1,18 @@
 "use client"
 
 import { useState } from 'react';
-import { Button } from "../../../components/ui/button";
+import { Button } from "@/components/ui/button";
 import { updateScript } from '../../actions';
 import dynamic from 'next/dynamic';
+import { Script } from '@/types/script';
 
 const CodeEditor = dynamic(() => import('@uiw/react-textarea-code-editor').then((mod) => mod.default), { ssr: false });
 
-export default function ScriptEditor({ script }) {
+interface ScriptEditorProps {
+  script: Script;
+}
+
+export default function ScriptEditor({ script }: ScriptEditorProps) {
   const [content, setContent] = useState(script.content);
 
   const handleUpdate = async () => {

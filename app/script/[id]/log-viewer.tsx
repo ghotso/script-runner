@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react';
-import { Button } from "../../../components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,10 +9,15 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../../../components/ui/dialog"
+} from "@/components/ui/dialog"
+import { Log } from '@/types/script';
 
-export default function LogViewer({ logs }) {
-  const [selectedLog, setSelectedLog] = useState(null);
+interface LogViewerProps {
+  logs: Log[];
+}
+
+export default function LogViewer({ logs }: LogViewerProps) {
+  const [selectedLog, setSelectedLog] = useState<Log | null>(null);
 
   return (
     <div className="mt-4">
@@ -21,7 +26,7 @@ export default function LogViewer({ logs }) {
         <p>No execution logs available.</p>
       ) : (
         <ul className="list-disc list-inside">
-          {logs.slice(-10).map((log, index) => (
+          {logs.slice(-10).map((log: Log, index: number) => (
             <li key={index}>
               <Dialog>
                 <DialogTrigger asChild>

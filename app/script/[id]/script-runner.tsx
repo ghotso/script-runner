@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Play, Loader2 } from 'lucide-react';
 import { runScript } from '../../actions';
-import { type Script } from '@/types/script';
+import { Script } from '@/types/script';
 
 interface ScriptRunnerProps {
   script: Script;
@@ -20,8 +20,8 @@ export default function ScriptRunner({ script }: ScriptRunnerProps) {
     try {
       const result = await runScript(script.id);
       setOutput(result);
-    } catch (error) {
-      setOutput(`Error: ${error.message}`);
+    } catch (error: unknown) {
+      setOutput(`Error: ${error instanceof Error ? error.message : String(error)}`);
     }
     setIsRunning(false);
   };

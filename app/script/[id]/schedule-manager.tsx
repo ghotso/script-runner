@@ -1,11 +1,16 @@
 "use client"
 
 import { useState } from 'react';
-import { Button } from "../../../components/ui/button";
-import { Input } from "../../../components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { updateSchedule } from '../../actions';
+import { Script } from '@/types/script';
 
-export default function ScheduleManager({ script }) {
+interface ScheduleManagerProps {
+  script: Script;
+}
+
+export default function ScheduleManager({ script }: ScheduleManagerProps) {
   const [schedule, setSchedule] = useState(script.schedule);
 
   const handleUpdate = async () => {
