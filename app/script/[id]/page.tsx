@@ -366,8 +366,10 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
                   <div className="flex items-center justify-between mb-1">
                     {execution.status === 'success' ? (
                       <CheckCircle className="text-green-500" size={16} />
-                    ) : (
+                    ) : execution.status === 'failed' ? (
                       <XCircle className="text-red-500" size={16} />
+                    ) : (
+                      <Clock className="text-yellow-500" size={16} />
                     )}
                     <span className="text-xs text-muted-foreground">
                       {new Date(execution.timestamp).toLocaleString()}

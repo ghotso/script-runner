@@ -1,6 +1,7 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
 import Sidebar from './components/Sidebar'
+import Head from 'next/head'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -16,9 +17,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <head>
-        <link rel="icon" href="/favicon.ico" />
-      </head>
+      <Head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+      </Head>
       <body className={`${inter.className} bg-background text-foreground min-h-screen flex`}>
         <Sidebar />
         <main className="flex-grow ml-16 p-4 sm:p-6 md:p-8">

@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import { Search, Tag, FileCode, Terminal, CheckCircle, XCircle } from 'lucide-react'
+import { Search, Tag, FileCode, Terminal, CheckCircle, XCircle, Clock } from 'lucide-react'
 import { Input } from './ui/input'
 import Select from 'react-select'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { translateCronSchedule } from '../utils/cron'
 
 type TagOption = { value: string; label: string };
 type Script = {
@@ -14,6 +15,7 @@ type Script = {
   name: string;
   type: string;
   tags: string[];
+  schedules: string[];
   executions: Array<{ status: 'success' | 'failed' }>;
 };
 
@@ -138,7 +140,7 @@ export default function ScriptList() {
                 <h3 className="text-xl font-semibold text-primary">{script.name}</h3>
               </div>
               <p className="text-muted-foreground mb-2">{script.type}</p>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 mb-2">
                 {script.tags.map(tag => (
                   <span 
                     key={tag} 
@@ -149,6 +151,18 @@ export default function ScriptList() {
                     {tag}
                   </span>
                 ))}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                <h4 className="font-semibold mb-1 flex items-center">
+                  <Clock className="mr-1" size={14} />
+                  Schedules:
+                </h4>
+                <ul className="list-disc list-inside">
+                  {script.schedules.map((schedule, index) => (
+                    <li key={index}>{translateCronSchedule(schedule)}</li>
+                  ))}
+                </ul>
+                {script.schedules.length === 0 && <p>No schedules set</p>}
               </div>
             </div>
           </Link>

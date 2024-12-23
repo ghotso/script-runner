@@ -8,7 +8,7 @@ import { Button } from '../components/ui/button'
 import { Label } from '../components/ui/label'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import { Plus, Clock, Tag, X } from 'lucide-react'
+import { Plus, Clock, Tag, X, FileCode, Terminal, Save } from 'lucide-react'
 
 export default function AddScript() {
   const router = useRouter()
@@ -83,10 +83,16 @@ export default function AddScript() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Add New Script</h1>
+      <h1 className="text-3xl font-bold flex items-center gap-2">
+        <FileCode className="h-8 w-8" />
+        Add New Script
+      </h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <Label htmlFor="name">Script Name</Label>
+          <Label htmlFor="name" className="flex items-center gap-2">
+            <Terminal className="h-4 w-4" />
+            Script Name
+          </Label>
           <Input
             id="name"
             value={name}
@@ -95,7 +101,10 @@ export default function AddScript() {
           />
         </div>
         <div>
-          <Label htmlFor="type">Script Type</Label>
+          <Label htmlFor="type" className="flex items-center gap-2">
+            <FileCode className="h-4 w-4" />
+            Script Type
+          </Label>
           <select
             id="type"
             value={type}
@@ -107,7 +116,10 @@ export default function AddScript() {
           </select>
         </div>
         <div>
-          <Label htmlFor="tags">Tags</Label>
+          <Label htmlFor="tags" className="flex items-center gap-2">
+            <Tag className="h-4 w-4" />
+            Tags
+          </Label>
           <div className="flex space-x-2">
             <Input
               id="tags"
@@ -122,23 +134,28 @@ export default function AddScript() {
           </div>
           <div className="flex flex-wrap gap-2 mt-2">
             {tags.map(tag => (
-              <span key={tag} className="bg-blue-600 text-xs px-2 py-1 rounded-full flex items-center group">
-                <Tag size={12} className="mr-1" />
-                {tag}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDeleteTag(tag)}
-                  className="ml-1 -mr-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </span>
+              <div key={tag} className="group relative">
+                <div className="bg-primary/10 text-primary px-3 py-1.5 rounded-full text-sm flex items-center gap-2">
+                  <span>{tag}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteTag(tag)}
+                    className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
             ))}
           </div>
         </div>
         <div>
-          <Label htmlFor="schedules">Schedules</Label>
+          <Label htmlFor="schedules" className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            Schedules
+          </Label>
           <div className="flex space-x-2">
             <Input
               id="schedules"
@@ -159,6 +176,7 @@ export default function AddScript() {
                   <span>{schedule}</span>
                 </div>
                 <Button
+                  type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => handleDeleteSchedule(schedule)}
@@ -171,7 +189,10 @@ export default function AddScript() {
           </ul>
         </div>
         <div>
-          <Label htmlFor="dependencies">Dependencies</Label>
+          <Label htmlFor="dependencies" className="flex items-center gap-2">
+            <FileCode className="h-4 w-4" />
+            Dependencies
+          </Label>
           <CodeEditor
             value={dependencies}
             onChange={setDependencies}
@@ -179,14 +200,20 @@ export default function AddScript() {
           />
         </div>
         <div>
-          <Label htmlFor="code">Script Code</Label>
+          <Label htmlFor="code" className="flex items-center gap-2">
+            <Terminal className="h-4 w-4" />
+            Script Code
+          </Label>
           <CodeEditor
             value={code}
             onChange={setCode}
             language={type.toLowerCase() as 'python' | 'bash'}
           />
         </div>
-        <Button type="submit">Save Script</Button>
+        <Button type="submit" className="w-full">
+          <Save className="mr-2 h-4 w-4" />
+          Save Script
+        </Button>
       </form>
       <ToastContainer position="bottom-right" theme="dark" />
     </div>
