@@ -6,10 +6,18 @@ import CodeEditor from '../../components/CodeEditor'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
-import { Play, Trash2, Clock, Save, Plus, Download, CheckCircle, XCircle, Loader, X } from 'lucide-react'
+import { Play, Trash2, Clock, Save, Plus, Download, CheckCircle, XCircle, Loader, X, Timer } from 'lucide-react'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { translateCronSchedule } from '../../utils/cron'
+
+type Execution = {
+  id: string;
+  status: 'success' | 'failed';
+  timestamp: string;
+  log: string;
+  runtime?: number; // in milliseconds
+};
 
 type Script = {
   id: string;
@@ -19,12 +27,7 @@ type Script = {
   code: string;
   dependencies: string;
   schedules: string[];
-  executions: Array<{
-    id: string;
-    status: 'success' | 'failed';
-    timestamp: string;
-    log: string;
-  }>;
+  executions: Execution[];
 };
 
 export default function ScriptDetails({ params }: { params: { id: string } }) {
@@ -253,7 +256,7 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
         <div className="space-y-4">
           <div>
             <Label htmlFor="schedules">Schedules</Label>
-            <div className="flex space-x-2 mb-4">
+            <div className="flex space-x-2">
               <Input
                 id="schedules"
                 value={newSchedule}
@@ -265,7 +268,7 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
-            <div className="rounded-md border">
+            <div className="rounded-md border mt-2">
               <table className="w-full">
                 <thead className="border-b bg-muted/50">
                   <tr>
@@ -325,17 +328,19 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
             </div>
             <div className="flex flex-wrap gap-2 mt-2">
               {script.tags.map(tag => (
-                <span key={tag} className="bg-primary text-primary-foreground text-sm px-3 py-1.5 rounded-full flex items-center group hover:bg-primary/90 transition-colors">
-                  {tag}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteTag(tag)}
-                    className="ml-1 -mr-1 opacity-0 group-hover:opacity-100 transition-opacity p-0 h-auto"
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </span>
+                <div key={tag} className="group relative">
+                  <div className="bg-primary/10 text-primary px-3 py-1.5 rounded-full text-sm flex items-center gap-2">
+                    <span>{tag}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteTag(tag)}
+                      className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -358,7 +363,10 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
                       {new Date(execution.timestamp).toLocaleString()}
                     </span>
                   </div>
-                  <p className="text-xs truncate">{execution.log}</p>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Timer className="h-3 w-3" />
+                    <span>{execution.runtime ? `${(execution.runtime / 1000).toFixed(1)}s` : 'N/A'}</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -366,11 +374,34 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
         </div>
       </div>
       {selectedExecution && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="glassmorphism p-6 max-w-2xl w-full max-h-[80vh] overflow-auto">
-            <h3 className="text-xl font-semibold mb-4">Execution Log</h3>
-            <pre className="whitespace-pre-wrap">{selectedExecution.log}</pre>
-            <Button className="mt-4" onClick={() => setSelectedExecution(null)}>Close</Button>
+        <div className="fixed inset-x-0 top-0 z-50 flex justify-center">
+          <div className="w-full max-w-4xl m-4">
+            <div className="glassmorphism p-6 relative">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-semibold">Execution Log</h3>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Timer className="h-4 w-4" />
+                    <span>{selectedExecution.runtime ? `${(selectedExecution.runtime / 1000).toFixed(1)}s` : 'N/A'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Clock className="h-4 w-4" />
+                    <span>{new Date(selectedExecution.timestamp).toLocaleString()}</span>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setSelectedExecution(null)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="bg-black/50 rounded-lg p-4 max-h-[60vh] overflow-auto">
+                <pre className="whitespace-pre-wrap font-mono text-sm">{selectedExecution.log}</pre>
+              </div>
+            </div>
           </div>
         </div>
       )}
