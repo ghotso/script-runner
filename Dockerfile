@@ -53,17 +53,9 @@ RUN apk add --no-cache python3 py3-pip jq make g++ dcron bash && \
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs && \
-    mkdir -p /data && \
-    mkdir -p /data/logs && \
-    mkdir -p /data/logs/runs && \
+    mkdir -p /data /data/logs /data/logs/runs && \
     chown -R nextjs:nodejs /data && \
-    chown -R nextjs:nodejs /data/logs && \
-    chown -R nextjs:nodejs /home/nextjs
-
-# Copy built assets
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+    chmod -R 755 /data
 
 # Create data volume
 VOLUME /data
@@ -76,8 +68,11 @@ RUN touch /data/settings.json && \
     chown nextjs:nodejs /data/settings.json && \
     chmod 644 /data/settings.json
 
-# Ensure the volume is created after setting up the files
-VOLUME /data
+# Copy built assets
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
 
 # Copy and set up start script
 COPY --chown=nextjs:nodejs start.sh ./

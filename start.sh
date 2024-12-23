@@ -10,9 +10,14 @@ log_message() {
 }
 
 # Ensure log directories exist and have correct permissions
-mkdir -p /data/logs /data/logs/runs
-chown -R nextjs:nodejs /data/logs /data/logs/runs
-chmod 755 /data/logs /data/logs/runs
+if [ ! -d "/data/logs" ] || [ ! -d "/data/logs/runs" ]; then
+    log_message "Creating log directories..."
+    mkdir -p /data/logs /data/logs/runs || log_message "Failed to create log directories"
+fi
+
+log_message "Setting permissions for log directories..."
+chown -R nextjs:nodejs /data/logs /data/logs/runs || log_message "Failed to set ownership for log directories"
+chmod -R 755 /data/logs /data/logs/runs || log_message "Failed to set permissions for log directories"
 
 log_message "Log directories created and permissions set"
 
