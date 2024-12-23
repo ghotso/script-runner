@@ -4,11 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ScriptEditor from './script-editor';
 import RequirementsEditor from './requirements-editor';
 import LogViewer from './log-viewer';
-import ScriptRunner from './script-runner';
-import DeleteScriptButton from './delete-script-button';
 import { getScript } from '@/lib/scripts';
 import SettingsCard from './settings-card';
 import { Suspense } from 'react';
+import dynamic from 'next/dynamic';
+import DeleteScriptButton from './delete-script-button';
 
 type Props = {
   params: { id: string }
@@ -25,6 +25,8 @@ export async function generateMetadata(
     title: script ? script.name : 'Script Not Found',
   }
 }
+
+const ClientScriptRunner = dynamic(() => import('./script-runner'), { ssr: false });
 
 export default async function ScriptDetail({ params }: Props) {
   const script = await getScript(params.id);
@@ -43,7 +45,7 @@ export default async function ScriptDetail({ params }: Props) {
           </div>
           <div className="flex gap-2">
             <Suspense fallback={<div>Loading...</div>}>
-              <ScriptRunner script={script} />
+              <ClientScriptRunner script={script} refreshLogs={() => {}} />
             </Suspense>
             <DeleteScriptButton scriptId={script.id} />
           </div>

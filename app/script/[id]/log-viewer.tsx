@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Dialog,
   DialogContent,
@@ -20,16 +21,25 @@ interface LogViewerProps {
 
 export default function LogViewer({ scriptId }: LogViewerProps) {
   const [logs, setLogs] = useState<Log[]>([]);
-  const [selectedLog, setSelectedLog] = useState<Log | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const fetchLogs = async () => {
+    setIsLoading(true);
+    setError(null);
     try {
       const script = await getScript(scriptId);
       if (script) {
         setLogs(script.logs || []);
+      } else {
+        setError('Script not found');
       }
     } catch (error) {
       console.error('Error fetching logs:', error);
+      setError('Failed to fetch logs');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -59,6 +69,19 @@ export default function LogViewer({ scriptId }: LogViewerProps) {
     }
   };
 
+  const refreshLogs = () => {
+    fetchLogs();
+    router.refresh();
+  };
+
+  if (isLoading) {
+    return <div className="text-center py-8">Loading logs...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-8 text-red-500">{error}</div>;
+  }
+
   return (
     <div className="mt-6 space-y-4">
       <h3 className="text-lg font-semibold text-white flex items-center gap-2">
@@ -77,7 +100,6 @@ export default function LogViewer({ scriptId }: LogViewerProps) {
               <DialogTrigger className="w-full">
                 <div 
                   className="group relative overflow-hidden rounded-lg border border-white/10 bg-white/5 p-6 hover:bg-white/10 transition-all duration-200"
-                  onClick={() => setSelectedLog(log)}
                 >
                   <div className="absolute right-4 top-4">
                     <div className={`rounded-full p-2 ${getStatusStyles(log.status)}`}>

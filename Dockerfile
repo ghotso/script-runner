@@ -65,6 +65,14 @@ VOLUME /data
 # Copy scripts.json to the data directory
 COPY --chown=nextjs:nodejs data/scripts.json /data/scripts.json
 
+# Add these lines
+RUN touch /data/settings.json && \
+    chown nextjs:nodejs /data/settings.json && \
+    chmod 644 /data/settings.json
+
+# Ensure the volume is created after setting up the files
+VOLUME /data
+
 # Copy and set up start script
 COPY --chown=nextjs:nodejs start.sh ./
 RUN chmod +x start.sh

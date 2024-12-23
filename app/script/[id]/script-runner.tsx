@@ -8,9 +8,10 @@ import { Script } from '@/types/script';
 
 interface ScriptRunnerProps {
   script: Script;
+  refreshLogs: () => void;
 }
 
-export default function ScriptRunner({ script }: ScriptRunnerProps) {
+export default function ScriptRunner({ script, refreshLogs }: ScriptRunnerProps) {
   const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
 
@@ -25,7 +26,7 @@ export default function ScriptRunner({ script }: ScriptRunnerProps) {
     }
     setIsRunning(false);
     // Trigger a re-render of the parent component
-    window.location.reload();
+    refreshLogs();
   };
 
   return (
