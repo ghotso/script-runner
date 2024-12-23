@@ -23,9 +23,13 @@ export default function LogViewer({ scriptId }: LogViewerProps) {
   const [selectedLog, setSelectedLog] = useState<Log | null>(null);
 
   const fetchLogs = async () => {
-    const script = await getScript(scriptId);
-    if (script) {
-      setLogs(script.logs || []);
+    try {
+      const script = await getScript(scriptId);
+      if (script) {
+        setLogs(script.logs || []);
+      }
+    } catch (error) {
+      console.error('Error fetching logs:', error);
     }
   };
 
