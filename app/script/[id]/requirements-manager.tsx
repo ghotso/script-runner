@@ -4,13 +4,18 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { updateRequirements, installRequirements } from '../../actions';
+import { Script } from '@/types/script';
 
-export default function RequirementsManager({ script }) {
+interface RequirementsManagerProps {
+  script: Script;
+}
+
+export default function RequirementsManager({ script }: RequirementsManagerProps) {
   const [requirements, setRequirements] = useState(script.requirements.join('\n'));
   const [isInstalling, setIsInstalling] = useState(false);
 
   const handleUpdate = async () => {
-    await updateRequirements(script.id, requirements.split('\n').filter(r => r.trim() !== ''));
+    await updateRequirements(script.id, requirements.split('\n').filter((r: string) => r.trim() !== ''));
   };
 
   const handleInstall = async () => {
