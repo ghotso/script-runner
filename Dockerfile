@@ -24,6 +24,8 @@ RUN npm run typecheck
 # Build application
 RUN npm run build
 
+RUN apk add --no-cache python3
+
 # Production stage
 FROM node:18.17.0-alpine AS runner
 
@@ -58,6 +60,9 @@ EXPOSE 3000
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
 ENV SCRIPTS_PATH "/data/scripts.json"
+ENV PYTHON_PATH "/usr/bin/python3"
+
+RUN apk add --no-cache python3
 
 # Start the application
 CMD ["node", "server.js"]

@@ -2,6 +2,7 @@ import './globals.css'
 import { Inter } from 'next/font/google'
 import Link from 'next/link'
 import { Home } from 'lucide-react'
+import { Toaster } from 'react-hot-toast'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -46,6 +47,7 @@ export default function RootLayout({
         <main className="relative container mx-auto py-6 px-4">
           {children}
         </main>
+        <Toaster />
       </body>
     </html>
   )

@@ -11,6 +11,7 @@ import TagEditor from './tag-editor';
 import DeleteScriptButton from './delete-script-button';
 import { getScript } from '@/lib/scripts';
 import { Script } from '@/types/script';
+import SettingsCard from './settings-card';
 
 interface PageProps {
   params: { id: string };
@@ -33,21 +34,13 @@ export default async function ScriptDetail({ params }: PageProps) {
           </div>
           <div className="flex gap-2">
             <ScriptRunner script={script} />
-            <Button variant="secondary">
-              <Save className="mr-2 h-4 w-4" />
-              Save Changes
-            </Button>
             <DeleteScriptButton scriptId={script.id} />
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold text-white mb-2">Tags</h3>
-            <TagEditor script={script} />
-          </div>
+          <SettingsCard script={script} />
           <RequirementsEditor script={script} />
           <ScriptEditor script={script} />
-          <ScheduleManager script={script} />
           <LogViewer logs={script.logs || []} />
         </CardContent>
       </Card>

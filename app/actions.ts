@@ -167,7 +167,7 @@ async function executePythonScript(content: string) {
   const tempScriptPath = path.join('/tmp', `script_${Date.now()}.py`);
   await fs.writeFile(tempScriptPath, content);
   try {
-    const { stdout, stderr } = await execAsync(`python ${tempScriptPath}`);
+    const { stdout, stderr } = await execAsync(`${process.env.PYTHON_PATH || 'python3'} ${tempScriptPath}`);
     if (stderr) {
       console.error('Python script error:', stderr);
     }

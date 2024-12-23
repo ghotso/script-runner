@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { updateTags } from '../../actions';
 import { Script } from '@/types/script';
 import { getTagColor } from '@/utils/tag-colors';
+import { Tag, Plus, Check } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 interface TagEditorProps {
   script: Script;
@@ -15,6 +17,7 @@ interface TagEditorProps {
 export default function TagEditor({ script }: TagEditorProps) {
   const [tags, setTags] = useState(script.tags);
   const [newTag, setNewTag] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleAddTag = () => {
     if (newTag && !tags.includes(newTag)) {
@@ -28,13 +31,16 @@ export default function TagEditor({ script }: TagEditorProps) {
   };
 
   const handleUpdate = async () => {
+    setIsUpdating(true);
     await updateTags(script.id, tags);
+    setIsUpdating(false);
+    toast.success('Tags updated successfully');
   };
 
   return (
-    <div className="mt-4">
+    <div>
       <h3 className="text-lg font-semibold">Tags:</h3>
-      <div className="flex flex-wrap gap-2 mt-2">
+      <div className="flex flex-wrap gap-2 mb-2">
         {tags.map((tag) => (
           <Badge key={tag} variant={getTagColor(tag) as any} className="px-2 py-1">
             {tag}
@@ -54,9 +60,24 @@ export default function TagEditor({ script }: TagEditorProps) {
           placeholder="Add new tag"
           className="mr-2"
         />
-        <Button onClick={handleAddTag}>Add</Button>
+        <Button onClick={handleAddTag}>
+          <Plus className="w-4 h-4 mr-2" />
+          Add
+        </Button>
       </div>
-      <Button onClick={handleUpdate} className="mt-2">Update Tags</Button>
+      <Button onClick={handleUpdate} className="mt-2" disabled={isUpdating}>
+        {isUpdating ? (
+          <>
+            <Tag className="w-4 h-4 mr-2 animate-spin" />
+            Updating...
+          </>
+        ) : (
+          <>
+            <Check className="w-4 h-4 mr-2" />
+            Update Tags
+          </>
+        )}
+      </Button>
     </div>
   );
 }

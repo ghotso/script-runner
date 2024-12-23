@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { updateRequirements, installRequirements } from '../../actions';
 import dynamic from 'next/dynamic';
 import { Script } from '@/types/script';
+import { Check, Package, Download } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 const CodeEditor = dynamic(() => import('@uiw/react-textarea-code-editor').then((mod) => mod.default), { ssr: false });
 
@@ -14,21 +16,29 @@ interface RequirementsEditorProps {
 
 export default function RequirementsEditor({ script }: RequirementsEditorProps) {
   const [requirements, setRequirements] = useState(script.requirements.join('\n'));
+  const [isUpdating, setIsUpdating] = useState(false);
   const [isInstalling, setIsInstalling] = useState(false);
 
   const handleUpdate = async () => {
+    setIsUpdating(true);
     await updateRequirements(script.id, requirements.split('\n').filter((r: string) => r.trim() !== ''));
+    setIsUpdating(false);
+    toast.success('Requirements updated successfully');
   };
 
   const handleInstall = async () => {
     setIsInstalling(true);
     await installRequirements(script.id);
     setIsInstalling(false);
+    toast.success('Requirements installed successfully');
   };
 
   return (
     <div className="mt-4">
-      <h3 className="text-lg font-semibold">Requirements:</h3>
+      <h3 className="text-lg font-semibold mb-2 flex items-center">
+        <Package className="w-5 h-5 mr-2" />
+        Requirements
+      </h3>
       <CodeEditor
         value={requirements}
         language="python"
@@ -46,9 +56,31 @@ export default function RequirementsEditor({ script }: RequirementsEditorProps) 
         data-line-numbers="true"
       />
       <div className="mt-2 space-x-2">
-        <Button onClick={handleUpdate}>Update Requirements</Button>
+        <Button onClick={handleUpdate} disabled={isUpdating}>
+          {isUpdating ? (
+            <>
+              <Package className="w-4 h-4 mr-2 animate-spin" />
+              Updating...
+            </>
+          ) : (
+            <>
+              <Check className="w-4 h-4 mr-2" />
+              Update Requirements
+            </>
+          )}
+        </Button>
         <Button onClick={handleInstall} disabled={isInstalling}>
-          {isInstalling ? 'Installing...' : 'Install Requirements'}
+          {isInstalling ? (
+            <>
+              <Download className="w-4 h-4 mr-2 animate-spin" />
+              Installing...
+            </>
+          ) : (
+            <>
+              <Download className="w-4 h-4 mr-2" />
+              Install Requirements
+            </>
+          )}
         </Button>
       </div>
     </div>
