@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import { Script } from '@/types/script';
 import { Package, Download, Save } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 const CodeEditor = dynamic(() => import('@uiw/react-textarea-code-editor').then((mod) => mod.default), { ssr: false });
 
@@ -18,23 +19,33 @@ export default function RequirementsEditor({ script }: RequirementsEditorProps) 
   const [requirements, setRequirements] = useState(script.requirements.join('\n'));
   const [isUpdating, setIsUpdating] = useState(false);
   const [isInstalling, setIsInstalling] = useState(false);
+  const router = useRouter();
 
   const handleUpdate = async () => {
     setIsUpdating(true);
-    await updateRequirements(script.id, requirements.split('\n').filter((r: string) => r.trim() !== ''));
+    try {
+      await updateRequirements(script.id, requirements.split('\n').filter((r: string) => r.trim() !== ''));
+      toast.success('Requirements updated successfully');
+      router.refresh();
+    } catch (error: any) {
+      toast.error(`Error: ${error.message}`);
+    }
     setIsUpdating(false);
-    toast.success('Requirements updated successfully');
   };
 
   const handleInstall = async () => {
     setIsInstalling(true);
-    const result = await installRequirements(script.id);
-    setIsInstalling(false);
-    if (result.success) {
-      toast.success(result.message);
-    } else {
-      toast.error(result.message);
+    try {
+      const result = await installRequirements(script.id);
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error: any) {
+      toast.error(`Error: ${error.message}`);
     }
+    setIsInstalling(false);
   };
 
   return (

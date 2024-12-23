@@ -37,9 +37,9 @@ export async function GET(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   try {
-    const updatedScript = await request.json();
+    const updatedFields = await request.json();
     const scripts = await getScriptsFromFile();
     const index = scripts.findIndex(s => s.id === params.id);
     
@@ -47,7 +47,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ error: 'Script not found' }, { status: 404 });
     }
     
-    scripts[index] = { ...scripts[index], ...updatedScript };
+    scripts[index] = { ...scripts[index], ...updatedFields };
     await saveScriptsToFile(scripts);
     
     return NextResponse.json(scripts[index]);

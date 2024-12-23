@@ -38,9 +38,9 @@ WORKDIR /app
 ENV NODE_ENV production
 
 # Install Python and other necessary tools, and set up paths properly
-RUN apk add --no-cache python3 py3-pip jq make g++ dcron bash sudo && \
+RUN apk add --no-cache python3 py3-pip python3-dev jq make g++ dcron bash sudo && \
     python3 -m ensurepip && \
-    pip3 install --no-cache-dir --upgrade pip setuptools wheel && \
+    pip3 install --no-cache-dir --upgrade pip setuptools wheel virtualenv && \
     mkdir -p /home/scriptrunner/.local/bin && \
     # Remove existing python symlink if it exists
     rm -f /usr/bin/python && \
@@ -82,22 +82,26 @@ RUN mkdir -p .next/cache && chown -R scriptrunner:scriptrunner .next
 # Set up cron job for log rotation
 RUN echo "0 0 * * * /usr/bin/find /data/logs -type f -mtime +7 -delete" > /etc/crontabs/root
 
+# Create virtual environment
+RUN python3 -m venv /app/venv
+ENV PATH="/app/venv/bin:$PATH"
+
 # Switch to non-root user
 USER scriptrunner
 
 # Set environment variables
-ENV PATH="/home/scriptrunner/.local/bin:$PATH"
+ENV PATH="/home/scriptrunner/.local/bin:/app/venv/bin:$PATH"
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 ENV SCRIPTS_PATH="/data/scripts.json"
-ENV PYTHON_PATH="/usr/bin/python3"
+ENV PYTHON_PATH="/app/venv/bin/python"
 ENV LOGS_PATH="/data/logs"
 ENV RUNS_LOGS_PATH="/data/logs/runs"
-ENV PIP_USER=true
+ENV VIRTUAL_ENV="/app/venv"
 
 # Expose port
 EXPOSE 3000
 
 # Start the application using the start script
-CMD ["/bin/bash", "-c", "sudo -E ./start.sh"]
+CMD ["/bin/bash", "-c", "./start.sh"]
 

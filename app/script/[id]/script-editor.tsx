@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import { Script } from '@/types/script';
 import { Save, Code } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 const CodeEditor = dynamic(() => import('@uiw/react-textarea-code-editor').then((mod) => mod.default), { ssr: false });
 
@@ -17,12 +18,18 @@ interface ScriptEditorProps {
 export default function ScriptEditor({ script }: ScriptEditorProps) {
   const [content, setContent] = useState(script.content);
   const [isUpdating, setIsUpdating] = useState(false);
+  const router = useRouter();
 
   const handleUpdate = async () => {
     setIsUpdating(true);
-    await updateScript(script.id, content);
+    try {
+      await updateScript(script.id, content);
+      toast.success('Script updated successfully');
+      router.refresh();
+    } catch (error: any) {
+      toast.error(`Error: ${error.message}`);
+    }
     setIsUpdating(false);
-    toast.success('Script updated successfully');
   };
 
   return (

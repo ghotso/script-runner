@@ -30,21 +30,31 @@ export async function addScript(script: Omit<Script, 'id' | 'logs'>) {
 }
 
 export async function updateScript(scriptId: string, content: string) {
-  const scripts = await getScripts();
-  const script = scripts.find((s: Script) => s.id === scriptId);
-  if (script) {
-    script.content = content;
-    await saveScript(script);
+  const response = await fetch(`${API_BASE_URL}/api/scripts/${scriptId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ content }),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to update script');
   }
+  return response.json();
 }
 
 export async function updateRequirements(scriptId: string, requirements: string[]) {
-  const scripts = await getScripts();
-  const script = scripts.find((s: Script) => s.id === scriptId);
-  if (script) {
-    script.requirements = requirements;
-    await saveScript(script);
+  const response = await fetch(`${API_BASE_URL}/api/scripts/${scriptId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ requirements }),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to update requirements');
   }
+  return response.json();
 }
 
 export async function installRequirements(scriptId: string) {
@@ -53,7 +63,7 @@ export async function installRequirements(scriptId: string) {
   if (script && script.requirements.length > 0) {
     console.log(`Installing requirements for script ${scriptId}: ${script.requirements.join(', ')}`);
     try {
-      const { stdout, stderr } = await execAsync(`pip3 install --user --no-cache-dir ${script.requirements.join(' ')}`);
+      const { stdout, stderr } = await execAsync(`${process.env.VIRTUAL_ENV}/bin/pip install --no-cache-dir ${script.requirements.join(' ')}`);
       
       if (stderr) {
         console.error('Error installing requirements:', stderr);

@@ -20,6 +20,9 @@ sudo chmod -R 755 /data/logs /data/logs/runs || log_message "Failed to set permi
 
 log_message "Log directories created and permissions set"
 
+# Activate virtual environment
+source /app/venv/bin/activate
+
 # Function to install requirements
 install_requirements() {
     SCRIPTS_FILE=${SCRIPTS_PATH:-/data/scripts.json}
@@ -35,11 +38,11 @@ install_requirements() {
             echo "$REQUIREMENTS" | tee -a /data/logs/container.log
             log_message "Installing requirements..."
             echo "$REQUIREMENTS" | while read req; do
-                if pip3 show "$req" > /dev/null 2>&1; then
+                if pip show "$req" > /dev/null 2>&1; then
                     log_message "$req is already installed."
                 else
                     log_message "Installing: $req"
-                    if pip3 install --user --no-cache-dir "$req"; then
+                    if pip install --no-cache-dir "$req"; then
                         log_message "$req installed successfully."
                     else
                         log_message "Error: Failed to install $req"
