@@ -2,11 +2,16 @@
 
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import fs from 'fs/promises';
+import path from 'path';
 import { Script, Log } from '@/types/script';
 import { Settings } from '@/types/settings';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 const execAsync = promisify(exec);
+
+const LOGS_PATH = process.env.LOGS_PATH || '/data/logs';
+const RUNS_LOGS_PATH = process.env.RUNS_LOGS_PATH || '/data/logs/runs';
 
 async function getScripts(): Promise<Script[]> {
   const response = await fetch(`${API_BASE_URL}/api/scripts`);
@@ -130,6 +135,20 @@ export async function updateTags(scriptId: string, tags: string[]) {
   }
 }
 
+async function writeToLogFile(content: string) {
+  const timestamp = new Date().toISOString().replace(/:/g, '-');
+  const logFileName = `${timestamp}.log`;
+  const logFilePath = path.join(LOGS_PATH, logFileName);
+  await fs.writeFile(logFilePath, content);
+}
+
+async function writeToRunLogFile(scriptId: string, content: string) {
+  const timestamp = new Date().toISOString().replace(/:/g, '-');
+  const logFileName = `${scriptId}_${timestamp}.log`;
+  const logFilePath = path.join(RUNS_LOGS_PATH, logFileName);
+  await fs.writeFile(logFilePath, content);
+}
+
 export async function runScript(scriptId: string) {
   try {
     const scripts = await getScripts();
@@ -155,6 +174,21 @@ export async function runScript(scriptId: string) {
     const endTime = new Date();
     const duration = endTime.getTime() - startTime.getTime();
 
+    const logContent = `
+Script ID: ${scriptId}
+Name: ${script.name}
+Type: ${script.type}
+Start Time: ${startTime.toISOString()}
+End Time: ${endTime.toISOString()}
+Duration: ${duration}ms
+Status: ${status}
+Output:
+${output}
+    `;
+
+    await writeToLogFile(logContent);
+    await writeToRunLogFile(scriptId, logContent);
+
     const newLog: Log = {
       timestamp: startTime.toISOString(),
       status: status,
@@ -179,7 +213,7 @@ async function executePythonScript(content: string) {
   if (stderr) {
     console.error('Python script error:', stderr);
   }
-  return stdout;
+  return stdout || stderr;
 }
 
 async function executeBashScript(content: string) {
@@ -187,7 +221,7 @@ async function executeBashScript(content: string) {
   if (stderr) {
     console.error('Bash script error:', stderr);
   }
-  return stdout;
+  return stdout || stderr;
 }
 
 export async function deleteScript(scriptId: string) {

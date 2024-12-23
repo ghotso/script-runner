@@ -54,7 +54,10 @@ RUN apk add --no-cache python3 py3-pip jq make g++ && \
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs && \
     mkdir -p /data && \
+    mkdir -p /data/logs && \
+    mkdir -p /data/logs/runs && \
     chown nextjs:nodejs /data && \
+    chown -R nextjs:nodejs /data/logs && \
     chown -R nextjs:nodejs /home/nextjs
 
 # Copy built assets
@@ -92,6 +95,8 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 ENV SCRIPTS_PATH="/data/scripts.json"
 ENV PYTHON_PATH="/usr/bin/python3"
+ENV LOGS_PATH="/data/logs"
+ENV RUNS_LOGS_PATH="/data/logs/runs"
 
 # Expose port
 EXPOSE 3000
