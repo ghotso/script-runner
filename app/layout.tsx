@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import Link from 'next/link'
 import { Home, FileCode, Settings } from 'lucide-react'
 import { Toaster } from 'react-hot-toast'
+import { ToastContainer } from '@/components/ui/toast';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -63,6 +64,7 @@ export default function RootLayout({
           {children}
         </main>
         <Toaster />
+        <ToastContainer />
       </body>
     </html>
   )

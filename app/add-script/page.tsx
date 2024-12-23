@@ -23,7 +23,7 @@ export default function AddScript() {
   const [requirements, setRequirements] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const router = useRouter();
-  const { toast } = useToast();
+  const { toast } = useToast(); // Added this line
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
