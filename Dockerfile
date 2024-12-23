@@ -35,7 +35,7 @@ WORKDIR /app
 ENV NODE_ENV production
 
 # Install Python and other necessary tools, and set up paths properly
-RUN apk add --no-cache python3 py3-pip && \
+RUN apk add --no-cache python3 py3-pip jq make g++ && \
     mkdir -p /home/nextjs/.local/bin && \
     chown -R root:root /home/nextjs && \
     # Remove existing python symlink if it exists
@@ -65,6 +65,10 @@ VOLUME /data
 # Copy scripts.json to the data directory
 COPY --chown=nextjs:nodejs data/scripts.json /data/scripts.json
 
+# Copy and set up start script
+COPY --chown=nextjs:nodejs start.sh ./
+RUN chmod +x start.sh
+
 # Switch to non-root user
 USER nextjs
 
@@ -75,13 +79,9 @@ ENV HOSTNAME="0.0.0.0"
 ENV SCRIPTS_PATH="/data/scripts.json"
 ENV PYTHON_PATH="/usr/bin/python3"
 
-# Install requirements for all scripts
-COPY install_requirements.sh /app/install_requirements.sh
-RUN chmod +x /app/install_requirements.sh
-CMD ["/bin/sh", "-c", "/app/install_requirements.sh && node server.js"]
-
 # Expose port
 EXPOSE 3000
 
-# Start the application
+# Start the application using the start script
+CMD ["./start.sh"]
 
