@@ -3,11 +3,9 @@ import { Inter } from 'next/font/google'
 import Link from 'next/link'
 import { Home, FileCode, Settings } from 'lucide-react'
 import { Toaster } from 'react-hot-toast'
-import dynamic from 'next/dynamic'
+import ClientToastContainer from '@/components/client-toast-container'
 
 const inter = Inter({ subsets: ['latin'] })
-
-const ToastContainer = dynamic(() => import('@/components/ui/toast').then(mod => mod.ToastContainer), { ssr: false })
 
 export const metadata = {
   title: 'Script Runner',
@@ -66,7 +64,7 @@ export default function RootLayout({
           {children}
         </main>
         <Toaster />
-        <ToastContainer />
+        <ClientToastContainer />
       </body>
     </html>
   )
