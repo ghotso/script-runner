@@ -6,7 +6,7 @@ import CodeEditor from '../../components/CodeEditor'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
-import { Play, Trash2, Clock, Save, Plus, Download, CheckCircle, XCircle, Loader, X, Timer } from 'lucide-react'
+import { Play, Trash2, Clock, Save, Plus, Download, CheckCircle, XCircle, Loader, X, Timer, FileCode, Terminal, Tag } from 'lucide-react'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { translateCronSchedule } from '../../utils/cron'
@@ -206,7 +206,10 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-3xl font-bold">{script.name}</h1>
+        <h1 className="text-3xl font-bold flex items-center gap-2">
+          <FileCode className="h-8 w-8" />
+          {script.name}
+        </h1>
         <div className="flex flex-wrap gap-2">
           <Button onClick={handleRun} disabled={isRunning}>
             {isRunning ? (
@@ -247,7 +250,10 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-4">
           <div>
-            <Label htmlFor="dependencies">Dependencies</Label>
+            <Label htmlFor="dependencies" className="flex items-center gap-2">
+              <FileCode className="h-4 w-4" />
+              Dependencies
+            </Label>
             <CodeEditor
               value={script.dependencies}
               onChange={(value) => handleChange('dependencies', value)}
@@ -255,7 +261,10 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
             />
           </div>
           <div>
-            <Label htmlFor="code">Script Code</Label>
+            <Label htmlFor="code" className="flex items-center gap-2">
+              <Terminal className="h-4 w-4" />
+              Script Code
+            </Label>
             <CodeEditor
               value={script.code}
               onChange={(value) => handleChange('code', value)}
@@ -265,7 +274,10 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
         </div>
         <div className="space-y-4">
           <div>
-            <Label htmlFor="schedules">Schedules</Label>
+            <Label htmlFor="schedules" className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Schedules
+            </Label>
             <div className="flex space-x-2">
               <Input
                 id="schedules"
@@ -323,7 +335,10 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
             </div>
           </div>
           <div>
-            <Label htmlFor="tags">Tags</Label>
+            <Label htmlFor="tags" className="flex items-center gap-2">
+              <Tag className="h-4 w-4" />
+              Tags
+            </Label>
             <div className="flex space-x-2">
               <Input
                 id="tags"
@@ -355,7 +370,10 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
             </div>
           </div>
           <div>
-            <Label>Execution History</Label>
+            <Label className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Execution History
+            </Label>
             <div className="grid grid-cols-2 gap-2 mt-2">
               {script.executions.slice(0, 10).map(execution => (
                 <div
