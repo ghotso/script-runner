@@ -7,8 +7,7 @@ import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { Play, Trash2, Clock, Save, Plus, Download, CheckCircle, XCircle, Loader, X, Timer, FileCode, Terminal, Tag } from 'lucide-react'
-import { Slide, ToastContainer, toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import { toast } from 'react-toastify'
 import { translateCronSchedule } from '../../utils/cron'
 
 type Execution = {
@@ -50,7 +49,7 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
         setScript(data)
       } catch (error) {
         console.error('Error fetching script:', error)
-        toast.error('Failed to load script', { transition: Slide })
+        toast.error('Failed to load script')
       }
     }
 
@@ -77,13 +76,13 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
       })
 
       if (data.execution.status === 'success') {
-        toast.success('Script executed successfully!', { transition: Slide })
+        toast.success('Script executed successfully!')
       } else {
-        toast.error('Script execution failed. Check the logs for details.', { transition: Slide })
+        toast.error('Script execution failed. Check the logs for details.')
       }
     } catch (error) {
       console.error('Error running script:', error)
-      toast.error(error instanceof Error ? error.message : 'Failed to execute script', { transition: Slide })
+      toast.error(error instanceof Error ? error.message : 'Failed to execute script')
     } finally {
       setIsRunning(false)
     }
@@ -96,11 +95,11 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
       if (!response.ok) {
         throw new Error('Failed to delete script')
       }
-      toast.success('Script deleted successfully!', { transition: Slide })
+      toast.success('Script deleted successfully!')
       router.push('/')
     } catch (error) {
       console.error('Error deleting script:', error)
-      toast.error('Failed to delete script', { transition: Slide })
+      toast.error('Failed to delete script')
     }
   }
 
@@ -115,10 +114,10 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
       if (!response.ok) {
         throw new Error('Failed to save script')
       }
-      toast.success('Script saved successfully!', { transition: Slide })
+      toast.success('Script saved successfully!')
     } catch (error) {
       console.error('Error saving script:', error)
-      toast.error('Failed to save script', { transition: Slide })
+      toast.error('Failed to save script')
     }
   }
 
@@ -135,7 +134,7 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
     setScript(prev => prev ? { ...prev, tags: updatedTags } : null)
     setNewTag('')
     await saveChanges({ tags: updatedTags })
-    toast.success(`Tag "${newTag}" added successfully!`, { transition: Slide })
+    toast.success(`Tag "${newTag}" added successfully!`)
   }
 
   const handleAddSchedule = async () => {
@@ -144,7 +143,7 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
     setScript(prev => prev ? { ...prev, schedules: updatedSchedules } : null)
     setNewSchedule('')
     await saveChanges({ schedules: updatedSchedules })
-    toast.success(`Schedule "${newSchedule}" added successfully!`, { transition: Slide })
+    toast.success(`Schedule "${newSchedule}" added successfully!`)
   }
 
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>, action: 'tag' | 'schedule') => {
@@ -169,11 +168,10 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
         throw new Error(data.error || 'Failed to install dependencies')
       }
 
-      // Show the detailed message from the server if available
-      toast.success(data.message || 'Dependencies installed successfully!', { transition: Slide })
+      toast.success(data.message || 'Dependencies installed successfully!')
     } catch (error) {
       console.error('Error installing dependencies:', error)
-      toast.error(error instanceof Error ? error.message : 'Failed to install dependencies', { transition: Slide })
+      toast.error(error instanceof Error ? error.message : 'Failed to install dependencies')
     } finally {
       setIsInstallingDependencies(false)
     }
@@ -184,7 +182,7 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
     const updatedTags = script.tags.filter(tag => tag !== tagToDelete)
     setScript(prev => prev ? { ...prev, tags: updatedTags } : null)
     await saveChanges({ tags: updatedTags })
-    toast.success(`Tag "${tagToDelete}" removed`, { transition: Slide })
+    toast.success(`Tag "${tagToDelete}" removed`)
   }
 
   const handleDeleteSchedule = async (scheduleToDelete: string) => {
@@ -192,7 +190,7 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
     const updatedSchedules = script.schedules.filter(schedule => schedule !== scheduleToDelete)
     setScript(prev => prev ? { ...prev, schedules: updatedSchedules } : null)
     await saveChanges({ schedules: updatedSchedules })
-    toast.success(`Schedule removed`, { transition: Slide })
+    toast.success(`Schedule removed`)
   }
 
   const saveChanges = async (changes: Partial<Script>) => {
@@ -207,7 +205,7 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
       }
     } catch (error) {
       console.error('Error saving changes:', error)
-      toast.error('Failed to save changes', { transition: Slide })
+      toast.error('Failed to save changes')
     }
   }
 
@@ -235,6 +233,10 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
                 Run Script
               </>
             )}
+          </Button>
+          <Button onClick={handleSave}>
+            <Save className="mr-2 h-4 w-4" />
+            Save Changes
           </Button>
           <Button onClick={handleInstallDependencies} disabled={isInstallingDependencies}>
             {isInstallingDependencies ? (
@@ -443,18 +445,6 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
           </div>
         </div>
       )}
-      <ToastContainer
-        position="bottom-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-      />
     </div>
   )
 }
