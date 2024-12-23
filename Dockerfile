@@ -6,13 +6,13 @@ WORKDIR /app
 # Install Python and build dependencies
 RUN apk add --no-cache python3 py3-pip make g++
 
-# Copy package files
-COPY package*.json ./
+# Copy package.json
+COPY package.json ./
 
-# Install dependencies and update lock file
-RUN npm install
+# Remove existing package-lock.json and install dependencies
+RUN rm -f package-lock.json && npm install
 
-# Copy source
+# Copy the rest of the source code
 COPY . .
 
 # Create an empty scripts.json file for build process
