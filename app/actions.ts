@@ -1,5 +1,3 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-
 'use server'
 
 import { exec } from 'child_process';
@@ -7,6 +5,7 @@ import { promisify } from 'util';
 import { Script, Log } from '@/types/script';
 import { Settings } from '@/types/settings';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 const execAsync = promisify(exec);
 
 async function getScripts(): Promise<Script[]> {
