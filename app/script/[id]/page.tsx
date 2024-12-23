@@ -1,5 +1,3 @@
-import fs from 'fs/promises';
-import path from 'path';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,27 +8,16 @@ import ScheduleManager from './schedule-manager';
 import LogViewer from './log-viewer';
 import ScriptRunner from './script-runner';
 import TagEditor from './tag-editor';
-import { type Script } from '@/types/script';
-
-async function getScript(id: string): Promise<Script | null> {
-  const filePath = path.join(process.cwd(), 'data', 'scripts.json');
-  try {
-    const fileContents = await fs.readFile(filePath, 'utf8');
-    const scripts = JSON.parse(fileContents).scripts as Script[];
-    return scripts.find(script => script.id === id) || null;
-  } catch (error) {
-    console.error('Error reading script file:', error);
-    return null;
-  }
-}
+import DeleteScriptButton from './delete-script-button';
+import { getScript } from '@/lib/scripts';
+import { Script } from '@/types/script';
 
 interface PageProps {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }
 
 export default async function ScriptDetail({ params }: PageProps) {
-  const { id } = await params;
-  const script = await getScript(id);
+  const script = await getScript(params.id);
 
   if (!script) {
     notFound();
@@ -50,6 +37,7 @@ export default async function ScriptDetail({ params }: PageProps) {
               <Save className="mr-2 h-4 w-4" />
               Save Changes
             </Button>
+            <DeleteScriptButton scriptId={script.id} />
           </div>
         </CardHeader>
         <CardContent className="space-y-6">

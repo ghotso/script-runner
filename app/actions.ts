@@ -4,6 +4,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { Script } from '@/types/script';
 
 const execAsync = promisify(exec);
 
@@ -24,10 +25,10 @@ async function saveScripts(scripts: any) {
   await fs.writeFile(filePath, JSON.stringify(scripts, null, 2));
 }
 
-export async function addScript(script: any) {
+export async function addScript(script: Omit<Script, 'id' | 'logs'>) {
   const data = await getScripts();
   
-  const newScript = {
+  const newScript: Script = {
     ...script,
     id: (data.scripts.length + 1).toString(),
     logs: []
@@ -36,6 +37,13 @@ export async function addScript(script: any) {
   data.scripts.push(newScript);
   
   await saveScripts(data);
+
+  // Make the script executable if it's a bash script
+  if (newScript.type === 'bash') {
+    const scriptPath = path.join('/data', `script_${newScript.id}.sh`);
+    await fs.writeFile(scriptPath, newScript.content);
+    await fs.chmod(scriptPath, '755');
+  }
 }
 
 export async function updateScript(scriptId: string, content: string) {

@@ -36,6 +36,7 @@ export default function ScriptEditor({ script }: ScriptEditorProps) {
         className="mt-2 rounded"
         data-color-mode="dark"
         data-line-numbers="true"
+        minHeight={200}
       />
       <Button onClick={handleUpdate} className="mt-2">Update Script</Button>
     </div>
