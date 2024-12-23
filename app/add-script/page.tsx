@@ -82,6 +82,7 @@ export default function AddScript() {
                   }}
                   className="rounded-md"
                   data-color-mode="dark"
+                  data-theme="dark"
                   data-line-numbers="true"
                 />
               </div>
@@ -102,6 +103,7 @@ export default function AddScript() {
                   }}
                   className="rounded-md"
                   data-color-mode="dark"
+                  data-theme="dark"
                   data-line-numbers="true"
                 />
               </div>

@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci
 
 # Copy source
 COPY . .
@@ -38,6 +38,9 @@ COPY --from=builder /app/.next/static ./.next/static
 
 # Create data volume
 VOLUME /data
+
+# Copy scripts.json to the data directory
+COPY --chown=nextjs:nodejs data/scripts.json /data/scripts.json
 
 # Switch to non-root user
 USER nextjs

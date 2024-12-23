@@ -14,13 +14,29 @@ const getScriptsFilePath = () => {
     : path.join(process.cwd(), 'data', 'scripts.json');
 };
 
-async function getScripts() {
+async function ensureScriptsFileExists() {
   const filePath = getScriptsFilePath();
-  const fileContents = await fs.readFile(filePath, 'utf8');
-  return JSON.parse(fileContents);
+  try {
+    await fs.access(filePath);
+  } catch (error) {
+    // File doesn't exist, create it with an empty scripts array
+    await fs.writeFile(filePath, JSON.stringify({ scripts: [] }, null, 2));
+  }
 }
 
-async function saveScripts(scripts: any) {
+async function getScripts(): Promise<{ scripts: Script[] }> {
+  await ensureScriptsFileExists();
+  const filePath = getScriptsFilePath();
+  try {
+    const fileContents = await fs.readFile(filePath, 'utf8');
+    return JSON.parse(fileContents) || { scripts: [] };
+  } catch (error) {
+    console.error('Error reading scripts file:', error);
+    return { scripts: [] };
+  }
+}
+
+async function saveScripts(scripts: { scripts: Script[] }) {
   const filePath = getScriptsFilePath();
   await fs.writeFile(filePath, JSON.stringify(scripts, null, 2));
 }

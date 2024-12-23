@@ -35,6 +35,7 @@ export default function ScriptEditor({ script }: ScriptEditorProps) {
         }}
         className="mt-2 rounded"
         data-color-mode="dark"
+        data-theme="dark"
         data-line-numbers="true"
         minHeight={200}
       />

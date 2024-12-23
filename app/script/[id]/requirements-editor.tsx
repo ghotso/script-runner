@@ -42,6 +42,7 @@ export default function RequirementsEditor({ script }: RequirementsEditorProps) 
         }}
         className="mt-2 rounded"
         data-color-mode="dark"
+        data-theme="dark"
         data-line-numbers="true"
       />
       <div className="mt-2 space-x-2">
