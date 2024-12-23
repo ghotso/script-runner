@@ -12,6 +12,9 @@ RUN npm install
 # Copy source code
 COPY . .
 
+# Create scripts and data directories
+RUN mkdir -p scripts data
+
 # Build the application
 RUN npm run build
 
