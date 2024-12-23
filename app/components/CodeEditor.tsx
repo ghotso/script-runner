@@ -10,7 +10,7 @@ import { dracula } from '@uiw/codemirror-theme-dracula'
 interface CodeEditorProps {
   value: string
   onChange: (value: string) => void
-  language: 'python' | 'bash'
+  language: 'python' | 'bash' | 'plaintext'
 }
 
 export default function CodeEditor({ value, onChange, language }: CodeEditorProps) {
@@ -24,12 +24,24 @@ export default function CodeEditor({ value, onChange, language }: CodeEditorProp
     return null
   }
 
+  const getLanguageExtension = (lang: string) => {
+    switch (lang) {
+      case 'python':
+        return python()
+      case 'bash':
+        return StreamLanguage.define(shell)
+      case 'plaintext':
+      default:
+        return []
+    }
+  }
+
   return (
     <CodeMirror
       value={value}
       onChange={onChange}
       theme={dracula}
-      extensions={[language === 'python' ? python() : StreamLanguage.define(shell)]}
+      extensions={[getLanguageExtension(language)]}
       className="border border-gray-700 rounded"
     />
   )
