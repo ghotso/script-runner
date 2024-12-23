@@ -34,18 +34,25 @@ WORKDIR /app
 
 ENV NODE_ENV production
 
-# Install Python and other necessary tools
+# Install Python and other necessary tools, and set up paths properly
 RUN apk add --no-cache python3 py3-pip && \
-    pip3 install --upgrade pip && \
     mkdir -p /home/nextjs/.local/bin && \
+    chown -R root:root /home/nextjs && \
+    # Remove existing python symlink if it exists
+    rm -f /usr/bin/python && \
+    # Create new symlink
     ln -s /usr/bin/python3 /usr/bin/python && \
-    echo 'export PATH="/home/nextjs/.local/bin:$PATH"' >> /home/nextjs/.profile
+    # Install pip packages globally to avoid permission issues
+    pip3 install --no-cache-dir --upgrade pip && \
+    # Set PATH for all users
+    echo 'export PATH="/home/nextjs/.local/bin:$PATH"' >> /etc/profile
 
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs && \
     mkdir -p /data && \
-    chown nextjs:nodejs /data
+    chown nextjs:nodejs /data && \
+    chown -R nextjs:nodejs /home/nextjs
 
 # Copy built assets
 COPY --from=builder /app/public ./public
