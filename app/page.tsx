@@ -12,3 +12,6 @@ export default async function Home() {
   );
 }
 
+// Add this to ensure the page is dynamically rendered at runtime
+export const dynamic = 'force-dynamic';
+

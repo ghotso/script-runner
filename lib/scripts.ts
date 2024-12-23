@@ -12,14 +12,6 @@ async function ensureScriptsFileExists() {
   const filePath = getScriptsFilePath();
   try {
     await fs.access(filePath);
-    // File exists, let's make sure it's valid JSON
-    const content = await fs.readFile(filePath, 'utf8');
-    try {
-      JSON.parse(content);
-    } catch (parseError) {
-      // If it's not valid JSON, overwrite with a valid empty structure
-      await fs.writeFile(filePath, JSON.stringify({ scripts: [] }, null, 2));
-    }
   } catch (error) {
     // File doesn't exist, create it with an empty scripts array
     await fs.writeFile(filePath, JSON.stringify({ scripts: [] }, null, 2));
@@ -27,6 +19,11 @@ async function ensureScriptsFileExists() {
 }
 
 export async function getScripts(): Promise<Script[]> {
+  if (process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE === 'phase-production-build') {
+    console.log('Build time: Returning empty scripts array');
+    return [];
+  }
+
   await ensureScriptsFileExists();
   const filePath = getScriptsFilePath();
   try {

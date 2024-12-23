@@ -12,6 +12,12 @@ RUN npm install
 # Copy source
 COPY . .
 
+# Create an empty scripts.json file for build process
+RUN mkdir -p /data && echo '{"scripts":[]}' > /data/scripts.json
+
+# Set environment variable for build
+ENV SCRIPTS_PATH=/data/scripts.json
+
 # Run TypeScript check
 RUN npm run typecheck
 
