@@ -1,3 +1,4 @@
+import { Metadata } from 'next'
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ScriptEditor from './script-editor';
@@ -8,21 +9,26 @@ import DeleteScriptButton from './delete-script-button';
 import { getScript } from '@/lib/scripts';
 import SettingsCard from './settings-card';
 
-type Params = {
-  id: string;
-};
+type Props = {
+  params: { id: string }
+  searchParams: { [key: string]: string | string[] | undefined }
+}
 
-type SearchParams = {
-  [key: string]: string | string[] | undefined;
-};
+export async function generateMetadata(
+  { params, searchParams }: Props
+): Promise<Metadata> {
+  // read route params
+  const id = params.id
 
-export default async function ScriptDetail({
-  params,
-  searchParams,
-}: {
-  params: Params;
-  searchParams: SearchParams;
-}) {
+  // fetch data
+  const script = await getScript(id)
+
+  return {
+    title: script ? script.name : 'Script Not Found',
+  }
+}
+
+export default async function ScriptDetail({ params }: Props) {
   const script = await getScript(params.id);
 
   if (!script) {
