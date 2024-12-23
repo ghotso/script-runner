@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Input } from "../../components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
-import { FileCode, Calendar, Plus } from 'lucide-react'
+import { FileCode, Calendar, Plus, CheckCircle2, XCircle } from 'lucide-react'
 import { Tag } from "../../components/ui/tag"
 import { MultiSelect } from "../../components/ui/multi-select"
 import { getTagColor } from '../../utils/tag-colors'
@@ -34,6 +34,12 @@ export default function ScriptList({ initialScripts }: ScriptListProps) {
       selectedTags.every(tag => script.tags.includes(tag))
     return matchesSearch && matchesTags
   })
+
+  const getLastRunStatus = (script: Script) => {
+    if (!script.logs || script.logs.length === 0) return null;
+    const lastLog = script.logs[script.logs.length - 1];
+    return lastLog.status.toLowerCase() === 'completed';
+  };
 
   return (
     <div className="container mx-auto p-4">
@@ -86,7 +92,7 @@ export default function ScriptList({ initialScripts }: ScriptListProps) {
                 ) : (
                   <Calendar className="w-8 h-8 text-green-400" />
                 )}
-                <div>
+                <div className="flex-1">
                   <CardTitle className="text-lg text-white group-hover:text-white/90 transition-colors">
                     {script.name}
                   </CardTitle>
@@ -94,6 +100,15 @@ export default function ScriptList({ initialScripts }: ScriptListProps) {
                     Type: {script.type}
                   </p>
                 </div>
+                {script.logs && script.logs.length > 0 && (
+                  <div className="ml-auto">
+                    {getLastRunStatus(script) ? (
+                      <CheckCircle2 className="w-5 h-5 text-green-400" />
+                    ) : (
+                      <XCircle className="w-5 h-5 text-red-400" />
+                    )}
+                  </div>
+                )}
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2 mb-4">

@@ -1,11 +1,10 @@
 "use client"
 
 import { useState } from 'react';
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { updateSchedule } from '../../actions';
 import { Script } from '@/types/script';
-import { Clock, Check, Plus } from 'lucide-react';
+import { Clock, Plus } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { Badge } from "@/components/ui/badge";
 
@@ -14,26 +13,36 @@ interface ScheduleManagerProps {
 }
 
 export default function ScheduleManager({ script }: ScheduleManagerProps) {
-  const [schedules, setSchedules] = useState<string[]>(script.schedule ? [script.schedule] : []);
+  const [schedules, setSchedules] = useState<string[]>(script.schedule ? script.schedule.split(',').filter(Boolean) : []);
   const [newSchedule, setNewSchedule] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const handleAddSchedule = () => {
+  const handleAddSchedule = async () => {
     if (newSchedule && !schedules.includes(newSchedule)) {
-      setSchedules([...schedules, newSchedule]);
+      setIsUpdating(true);
+      const newSchedules = [...schedules, newSchedule];
+      setSchedules(newSchedules);
       setNewSchedule('');
+      await updateSchedule(script.id, newSchedules.join(','));
+      setIsUpdating(false);
+      toast.success('Schedule added successfully');
     }
   };
 
-  const handleRemoveSchedule = (scheduleToRemove: string) => {
-    setSchedules(schedules.filter(schedule => schedule !== scheduleToRemove));
+  const handleRemoveSchedule = async (scheduleToRemove: string) => {
+    setIsUpdating(true);
+    const newSchedules = schedules.filter(schedule => schedule !== scheduleToRemove);
+    setSchedules(newSchedules);
+    await updateSchedule(script.id, newSchedules.join(','));
+    setIsUpdating(false);
+    toast.success('Schedule removed successfully');
   };
 
-  const handleUpdate = async () => {
-    setIsUpdating(true);
-    await updateSchedule(script.id, schedules.join(','));
-    setIsUpdating(false);
-    toast.success('Schedules updated successfully');
+  const handleKeyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      await handleAddSchedule();
+    }
   };
 
   return (
@@ -45,6 +54,7 @@ export default function ScheduleManager({ script }: ScheduleManagerProps) {
             <button
               onClick={() => handleRemoveSchedule(schedule)}
               className="ml-2 text-xs font-bold"
+              disabled={isUpdating}
             >
               ×
             </button>
@@ -55,27 +65,19 @@ export default function ScheduleManager({ script }: ScheduleManagerProps) {
         <Input
           value={newSchedule}
           onChange={(e) => setNewSchedule(e.target.value)}
+          onKeyPress={handleKeyPress}
           placeholder="Enter cron expression (e.g., '0 * * * *' for hourly)"
           className="mr-2"
+          disabled={isUpdating}
         />
-        <Button onClick={handleAddSchedule}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add
-        </Button>
+        <button
+          onClick={handleAddSchedule}
+          disabled={isUpdating}
+          className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-10 px-4 py-2"
+        >
+          <Plus className="h-4 w-4" />
+        </button>
       </div>
-      <Button onClick={handleUpdate} className="mt-2" disabled={isUpdating}>
-        {isUpdating ? (
-          <>
-            <Clock className="w-4 h-4 mr-2 animate-spin" />
-            Updating...
-          </>
-        ) : (
-          <>
-            <Check className="w-4 h-4 mr-2" />
-            Update Schedules
-          </>
-        )}
-      </Button>
     </div>
   );
 }

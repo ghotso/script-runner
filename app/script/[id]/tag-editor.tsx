@@ -1,13 +1,12 @@
 'use client'
 
 import { useState } from 'react';
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { updateTags } from '../../actions';
 import { Script } from '@/types/script';
 import { getTagColor } from '@/utils/tag-colors';
-import { Tag, Plus, Check } from 'lucide-react';
+import { Plus, Tag } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 interface TagEditorProps {
@@ -19,22 +18,32 @@ export default function TagEditor({ script }: TagEditorProps) {
   const [newTag, setNewTag] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const handleAddTag = () => {
+  const handleAddTag = async () => {
     if (newTag && !tags.includes(newTag)) {
-      setTags([...tags, newTag]);
+      setIsUpdating(true);
+      const newTags = [...tags, newTag];
+      setTags(newTags);
       setNewTag('');
+      await updateTags(script.id, newTags);
+      setIsUpdating(false);
+      toast.success('Tag added successfully');
     }
   };
 
-  const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
+  const handleRemoveTag = async (tagToRemove: string) => {
+    setIsUpdating(true);
+    const newTags = tags.filter(tag => tag !== tagToRemove);
+    setTags(newTags);
+    await updateTags(script.id, newTags);
+    setIsUpdating(false);
+    toast.success('Tag removed successfully');
   };
 
-  const handleUpdate = async () => {
-    setIsUpdating(true);
-    await updateTags(script.id, tags);
-    setIsUpdating(false);
-    toast.success('Tags updated successfully');
+  const handleKeyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      await handleAddTag();
+    }
   };
 
   return (
@@ -46,6 +55,7 @@ export default function TagEditor({ script }: TagEditorProps) {
             <button
               onClick={() => handleRemoveTag(tag)}
               className="ml-2 text-xs font-bold"
+              disabled={isUpdating}
             >
               ×
             </button>
@@ -56,27 +66,19 @@ export default function TagEditor({ script }: TagEditorProps) {
         <Input
           value={newTag}
           onChange={(e) => setNewTag(e.target.value)}
+          onKeyPress={handleKeyPress}
           placeholder="Add new tag"
           className="mr-2"
+          disabled={isUpdating}
         />
-        <Button onClick={handleAddTag}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add
-        </Button>
+        <button
+          onClick={handleAddTag}
+          disabled={isUpdating}
+          className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-10 px-4 py-2"
+        >
+          <Plus className="h-4 w-4" />
+        </button>
       </div>
-      <Button onClick={handleUpdate} className="mt-2" disabled={isUpdating}>
-        {isUpdating ? (
-          <>
-            <Tag className="w-4 h-4 mr-2 animate-spin" />
-            Updating...
-          </>
-        ) : (
-          <>
-            <Check className="w-4 h-4 mr-2" />
-            Update Tags
-          </>
-        )}
-      </Button>
     </div>
   );
 }

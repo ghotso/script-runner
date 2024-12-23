@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { updateScript } from '../../actions';
 import dynamic from 'next/dynamic';
 import { Script } from '@/types/script';
-import { Check, Code } from 'lucide-react';
+import { Save, Code } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const CodeEditor = dynamic(() => import('@uiw/react-textarea-code-editor').then((mod) => mod.default), { ssr: false });
@@ -51,13 +51,13 @@ export default function ScriptEditor({ script }: ScriptEditorProps) {
       <Button onClick={handleUpdate} className="mt-2" disabled={isUpdating}>
         {isUpdating ? (
           <>
-            <Code className="w-4 h-4 mr-2 animate-spin" />
-            Updating...
+            <Save className="w-4 h-4 mr-2 animate-spin" />
+            Saving...
           </>
         ) : (
           <>
-            <Check className="w-4 h-4 mr-2" />
-            Update Script
+            <Save className="w-4 h-4 mr-2" />
+            Save Script
           </>
         )}
       </Button>

@@ -197,11 +197,11 @@ export async function runScript(scriptId: string) {
     timestamp: startTime.toISOString(),
     status: status,
     duration: duration,
-    output: output
+    output: output || 'Script executed successfully with no output' 
   };
 
   script.logs.push(newLog);
-  script.logs = script.logs.slice(-10);
+  script.logs = script.logs.slice(-12); 
 
   await saveScripts(scripts);
 

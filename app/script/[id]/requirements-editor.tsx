@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { updateRequirements, installRequirements } from '../../actions';
 import dynamic from 'next/dynamic';
 import { Script } from '@/types/script';
-import { Check, Package, Download } from 'lucide-react';
+import { Package, Download, Save } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const CodeEditor = dynamic(() => import('@uiw/react-textarea-code-editor').then((mod) => mod.default), { ssr: false });
@@ -63,13 +63,13 @@ export default function RequirementsEditor({ script }: RequirementsEditorProps) 
         <Button onClick={handleUpdate} disabled={isUpdating}>
           {isUpdating ? (
             <>
-              <Package className="w-4 h-4 mr-2 animate-spin" />
-              Updating...
+              <Save className="w-4 h-4 mr-2 animate-spin" />
+              Saving...
             </>
           ) : (
             <>
-              <Check className="w-4 h-4 mr-2" />
-              Update Requirements
+              <Save className="w-4 h-4 mr-2" />
+              Save Requirements
             </>
           )}
         </Button>
