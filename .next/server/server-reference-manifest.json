@@ -1,83 +1,118 @@
 {
   "node": {
-    "4006b0e5c6f55fec20495bad4ef8c5902a0505dfa1": {
+    "401e4eb9cf8211aa26a35385e1956e60c15dbc774a": {
       "workers": {
         "app/script/[id]/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CMichael%5C%5CDocuments%5C%5CProjekte%5C%5Cscript-runner%5C%5Capp%5C%5Cactions.ts%22%2C%5B%5B%224006b0e5c6f55fec20495bad4ef8c5902a0505dfa1%22%2C%22installRequirements%22%5D%2C%5B%22405eb1fb7d6dfab1583f2515642ae7e7f31249e2d3%22%2C%22runScript%22%5D%2C%5B%2240d7859363ba2d4ff9bc496ee7a4c212c2277879f2%22%2C%22addScript%22%5D%2C%5B%226018d06f812579d4e41f11dfe39b03a391f634d4ea%22%2C%22updateScript%22%5D%2C%5B%22606eb39504c2e2f3c14c38dca1fac44ceb2376f1f7%22%2C%22updateRequirements%22%5D%2C%5B%2260841d6fa9a1d7bd59db3f85adef9b7b670fa97312%22%2C%22updateTags%22%5D%2C%5B%2260c1b3ff1107885e68862f35f1aa1ce731a63922f9%22%2C%22updateSchedule%22%5D%5D%5D%5D&__client_imported__=true!",
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CMichael%5C%5CDocuments%5C%5CProjekte%5C%5Cscript-runner%5C%5Capp%5C%5Cactions.ts%22%2C%5B%5B%22401e4eb9cf8211aa26a35385e1956e60c15dbc774a%22%2C%22installRequirements%22%5D%2C%5B%22402e96a2c7f5acead208745b7739b834beadc3bb1e%22%2C%22addScript%22%5D%2C%5B%22403639e03eee2e7dbfba0d1b2ae3428102f4763c5d%22%2C%22runScript%22%5D%2C%5B%22601f13a61354003af521c37e152b743af36b85c398%22%2C%22updateScript%22%5D%2C%5B%2260457398054e62348d440a14aaec7bd139bee1f614%22%2C%22updateTags%22%5D%2C%5B%226051d398b68275966ed27752dd7b21653dee4f3874%22%2C%22updateSchedule%22%5D%2C%5B%2260a4706d1c0e74cd3f1351b96f97833421726f0100%22%2C%22updateRequirements%22%5D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        },
+        "app/add-script/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CMichael%5C%5CDocuments%5C%5CProjekte%5C%5Cscript-runner%5C%5Capp%5C%5Cactions.ts%22%2C%5B%5B%22401e4eb9cf8211aa26a35385e1956e60c15dbc774a%22%2C%22installRequirements%22%5D%2C%5B%22402e96a2c7f5acead208745b7739b834beadc3bb1e%22%2C%22addScript%22%5D%2C%5B%22403639e03eee2e7dbfba0d1b2ae3428102f4763c5d%22%2C%22runScript%22%5D%2C%5B%22601f13a61354003af521c37e152b743af36b85c398%22%2C%22updateScript%22%5D%2C%5B%2260457398054e62348d440a14aaec7bd139bee1f614%22%2C%22updateTags%22%5D%2C%5B%226051d398b68275966ed27752dd7b21653dee4f3874%22%2C%22updateSchedule%22%5D%2C%5B%2260a4706d1c0e74cd3f1351b96f97833421726f0100%22%2C%22updateRequirements%22%5D%5D%5D%5D&__client_imported__=true!",
           "async": false
         }
       },
       "layer": {
-        "app/script/[id]/page": "action-browser"
+        "app/script/[id]/page": "action-browser",
+        "app/add-script/page": "action-browser"
       }
     },
-    "405eb1fb7d6dfab1583f2515642ae7e7f31249e2d3": {
+    "402e96a2c7f5acead208745b7739b834beadc3bb1e": {
       "workers": {
         "app/script/[id]/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CMichael%5C%5CDocuments%5C%5CProjekte%5C%5Cscript-runner%5C%5Capp%5C%5Cactions.ts%22%2C%5B%5B%224006b0e5c6f55fec20495bad4ef8c5902a0505dfa1%22%2C%22installRequirements%22%5D%2C%5B%22405eb1fb7d6dfab1583f2515642ae7e7f31249e2d3%22%2C%22runScript%22%5D%2C%5B%2240d7859363ba2d4ff9bc496ee7a4c212c2277879f2%22%2C%22addScript%22%5D%2C%5B%226018d06f812579d4e41f11dfe39b03a391f634d4ea%22%2C%22updateScript%22%5D%2C%5B%22606eb39504c2e2f3c14c38dca1fac44ceb2376f1f7%22%2C%22updateRequirements%22%5D%2C%5B%2260841d6fa9a1d7bd59db3f85adef9b7b670fa97312%22%2C%22updateTags%22%5D%2C%5B%2260c1b3ff1107885e68862f35f1aa1ce731a63922f9%22%2C%22updateSchedule%22%5D%5D%5D%5D&__client_imported__=true!",
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CMichael%5C%5CDocuments%5C%5CProjekte%5C%5Cscript-runner%5C%5Capp%5C%5Cactions.ts%22%2C%5B%5B%22401e4eb9cf8211aa26a35385e1956e60c15dbc774a%22%2C%22installRequirements%22%5D%2C%5B%22402e96a2c7f5acead208745b7739b834beadc3bb1e%22%2C%22addScript%22%5D%2C%5B%22403639e03eee2e7dbfba0d1b2ae3428102f4763c5d%22%2C%22runScript%22%5D%2C%5B%22601f13a61354003af521c37e152b743af36b85c398%22%2C%22updateScript%22%5D%2C%5B%2260457398054e62348d440a14aaec7bd139bee1f614%22%2C%22updateTags%22%5D%2C%5B%226051d398b68275966ed27752dd7b21653dee4f3874%22%2C%22updateSchedule%22%5D%2C%5B%2260a4706d1c0e74cd3f1351b96f97833421726f0100%22%2C%22updateRequirements%22%5D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        },
+        "app/add-script/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CMichael%5C%5CDocuments%5C%5CProjekte%5C%5Cscript-runner%5C%5Capp%5C%5Cactions.ts%22%2C%5B%5B%22401e4eb9cf8211aa26a35385e1956e60c15dbc774a%22%2C%22installRequirements%22%5D%2C%5B%22402e96a2c7f5acead208745b7739b834beadc3bb1e%22%2C%22addScript%22%5D%2C%5B%22403639e03eee2e7dbfba0d1b2ae3428102f4763c5d%22%2C%22runScript%22%5D%2C%5B%22601f13a61354003af521c37e152b743af36b85c398%22%2C%22updateScript%22%5D%2C%5B%2260457398054e62348d440a14aaec7bd139bee1f614%22%2C%22updateTags%22%5D%2C%5B%226051d398b68275966ed27752dd7b21653dee4f3874%22%2C%22updateSchedule%22%5D%2C%5B%2260a4706d1c0e74cd3f1351b96f97833421726f0100%22%2C%22updateRequirements%22%5D%5D%5D%5D&__client_imported__=true!",
           "async": false
         }
       },
       "layer": {
-        "app/script/[id]/page": "action-browser"
+        "app/script/[id]/page": "action-browser",
+        "app/add-script/page": "action-browser"
       }
     },
-    "40d7859363ba2d4ff9bc496ee7a4c212c2277879f2": {
+    "403639e03eee2e7dbfba0d1b2ae3428102f4763c5d": {
       "workers": {
         "app/script/[id]/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CMichael%5C%5CDocuments%5C%5CProjekte%5C%5Cscript-runner%5C%5Capp%5C%5Cactions.ts%22%2C%5B%5B%224006b0e5c6f55fec20495bad4ef8c5902a0505dfa1%22%2C%22installRequirements%22%5D%2C%5B%22405eb1fb7d6dfab1583f2515642ae7e7f31249e2d3%22%2C%22runScript%22%5D%2C%5B%2240d7859363ba2d4ff9bc496ee7a4c212c2277879f2%22%2C%22addScript%22%5D%2C%5B%226018d06f812579d4e41f11dfe39b03a391f634d4ea%22%2C%22updateScript%22%5D%2C%5B%22606eb39504c2e2f3c14c38dca1fac44ceb2376f1f7%22%2C%22updateRequirements%22%5D%2C%5B%2260841d6fa9a1d7bd59db3f85adef9b7b670fa97312%22%2C%22updateTags%22%5D%2C%5B%2260c1b3ff1107885e68862f35f1aa1ce731a63922f9%22%2C%22updateSchedule%22%5D%5D%5D%5D&__client_imported__=true!",
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CMichael%5C%5CDocuments%5C%5CProjekte%5C%5Cscript-runner%5C%5Capp%5C%5Cactions.ts%22%2C%5B%5B%22401e4eb9cf8211aa26a35385e1956e60c15dbc774a%22%2C%22installRequirements%22%5D%2C%5B%22402e96a2c7f5acead208745b7739b834beadc3bb1e%22%2C%22addScript%22%5D%2C%5B%22403639e03eee2e7dbfba0d1b2ae3428102f4763c5d%22%2C%22runScript%22%5D%2C%5B%22601f13a61354003af521c37e152b743af36b85c398%22%2C%22updateScript%22%5D%2C%5B%2260457398054e62348d440a14aaec7bd139bee1f614%22%2C%22updateTags%22%5D%2C%5B%226051d398b68275966ed27752dd7b21653dee4f3874%22%2C%22updateSchedule%22%5D%2C%5B%2260a4706d1c0e74cd3f1351b96f97833421726f0100%22%2C%22updateRequirements%22%5D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        },
+        "app/add-script/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CMichael%5C%5CDocuments%5C%5CProjekte%5C%5Cscript-runner%5C%5Capp%5C%5Cactions.ts%22%2C%5B%5B%22401e4eb9cf8211aa26a35385e1956e60c15dbc774a%22%2C%22installRequirements%22%5D%2C%5B%22402e96a2c7f5acead208745b7739b834beadc3bb1e%22%2C%22addScript%22%5D%2C%5B%22403639e03eee2e7dbfba0d1b2ae3428102f4763c5d%22%2C%22runScript%22%5D%2C%5B%22601f13a61354003af521c37e152b743af36b85c398%22%2C%22updateScript%22%5D%2C%5B%2260457398054e62348d440a14aaec7bd139bee1f614%22%2C%22updateTags%22%5D%2C%5B%226051d398b68275966ed27752dd7b21653dee4f3874%22%2C%22updateSchedule%22%5D%2C%5B%2260a4706d1c0e74cd3f1351b96f97833421726f0100%22%2C%22updateRequirements%22%5D%5D%5D%5D&__client_imported__=true!",
           "async": false
         }
       },
       "layer": {
-        "app/script/[id]/page": "action-browser"
+        "app/script/[id]/page": "action-browser",
+        "app/add-script/page": "action-browser"
       }
     },
-    "6018d06f812579d4e41f11dfe39b03a391f634d4ea": {
+    "601f13a61354003af521c37e152b743af36b85c398": {
       "workers": {
         "app/script/[id]/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CMichael%5C%5CDocuments%5C%5CProjekte%5C%5Cscript-runner%5C%5Capp%5C%5Cactions.ts%22%2C%5B%5B%224006b0e5c6f55fec20495bad4ef8c5902a0505dfa1%22%2C%22installRequirements%22%5D%2C%5B%22405eb1fb7d6dfab1583f2515642ae7e7f31249e2d3%22%2C%22runScript%22%5D%2C%5B%2240d7859363ba2d4ff9bc496ee7a4c212c2277879f2%22%2C%22addScript%22%5D%2C%5B%226018d06f812579d4e41f11dfe39b03a391f634d4ea%22%2C%22updateScript%22%5D%2C%5B%22606eb39504c2e2f3c14c38dca1fac44ceb2376f1f7%22%2C%22updateRequirements%22%5D%2C%5B%2260841d6fa9a1d7bd59db3f85adef9b7b670fa97312%22%2C%22updateTags%22%5D%2C%5B%2260c1b3ff1107885e68862f35f1aa1ce731a63922f9%22%2C%22updateSchedule%22%5D%5D%5D%5D&__client_imported__=true!",
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CMichael%5C%5CDocuments%5C%5CProjekte%5C%5Cscript-runner%5C%5Capp%5C%5Cactions.ts%22%2C%5B%5B%22401e4eb9cf8211aa26a35385e1956e60c15dbc774a%22%2C%22installRequirements%22%5D%2C%5B%22402e96a2c7f5acead208745b7739b834beadc3bb1e%22%2C%22addScript%22%5D%2C%5B%22403639e03eee2e7dbfba0d1b2ae3428102f4763c5d%22%2C%22runScript%22%5D%2C%5B%22601f13a61354003af521c37e152b743af36b85c398%22%2C%22updateScript%22%5D%2C%5B%2260457398054e62348d440a14aaec7bd139bee1f614%22%2C%22updateTags%22%5D%2C%5B%226051d398b68275966ed27752dd7b21653dee4f3874%22%2C%22updateSchedule%22%5D%2C%5B%2260a4706d1c0e74cd3f1351b96f97833421726f0100%22%2C%22updateRequirements%22%5D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        },
+        "app/add-script/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CMichael%5C%5CDocuments%5C%5CProjekte%5C%5Cscript-runner%5C%5Capp%5C%5Cactions.ts%22%2C%5B%5B%22401e4eb9cf8211aa26a35385e1956e60c15dbc774a%22%2C%22installRequirements%22%5D%2C%5B%22402e96a2c7f5acead208745b7739b834beadc3bb1e%22%2C%22addScript%22%5D%2C%5B%22403639e03eee2e7dbfba0d1b2ae3428102f4763c5d%22%2C%22runScript%22%5D%2C%5B%22601f13a61354003af521c37e152b743af36b85c398%22%2C%22updateScript%22%5D%2C%5B%2260457398054e62348d440a14aaec7bd139bee1f614%22%2C%22updateTags%22%5D%2C%5B%226051d398b68275966ed27752dd7b21653dee4f3874%22%2C%22updateSchedule%22%5D%2C%5B%2260a4706d1c0e74cd3f1351b96f97833421726f0100%22%2C%22updateRequirements%22%5D%5D%5D%5D&__client_imported__=true!",
           "async": false
         }
       },
       "layer": {
-        "app/script/[id]/page": "action-browser"
+        "app/script/[id]/page": "action-browser",
+        "app/add-script/page": "action-browser"
       }
     },
-    "606eb39504c2e2f3c14c38dca1fac44ceb2376f1f7": {
+    "60457398054e62348d440a14aaec7bd139bee1f614": {
       "workers": {
         "app/script/[id]/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CMichael%5C%5CDocuments%5C%5CProjekte%5C%5Cscript-runner%5C%5Capp%5C%5Cactions.ts%22%2C%5B%5B%224006b0e5c6f55fec20495bad4ef8c5902a0505dfa1%22%2C%22installRequirements%22%5D%2C%5B%22405eb1fb7d6dfab1583f2515642ae7e7f31249e2d3%22%2C%22runScript%22%5D%2C%5B%2240d7859363ba2d4ff9bc496ee7a4c212c2277879f2%22%2C%22addScript%22%5D%2C%5B%226018d06f812579d4e41f11dfe39b03a391f634d4ea%22%2C%22updateScript%22%5D%2C%5B%22606eb39504c2e2f3c14c38dca1fac44ceb2376f1f7%22%2C%22updateRequirements%22%5D%2C%5B%2260841d6fa9a1d7bd59db3f85adef9b7b670fa97312%22%2C%22updateTags%22%5D%2C%5B%2260c1b3ff1107885e68862f35f1aa1ce731a63922f9%22%2C%22updateSchedule%22%5D%5D%5D%5D&__client_imported__=true!",
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CMichael%5C%5CDocuments%5C%5CProjekte%5C%5Cscript-runner%5C%5Capp%5C%5Cactions.ts%22%2C%5B%5B%22401e4eb9cf8211aa26a35385e1956e60c15dbc774a%22%2C%22installRequirements%22%5D%2C%5B%22402e96a2c7f5acead208745b7739b834beadc3bb1e%22%2C%22addScript%22%5D%2C%5B%22403639e03eee2e7dbfba0d1b2ae3428102f4763c5d%22%2C%22runScript%22%5D%2C%5B%22601f13a61354003af521c37e152b743af36b85c398%22%2C%22updateScript%22%5D%2C%5B%2260457398054e62348d440a14aaec7bd139bee1f614%22%2C%22updateTags%22%5D%2C%5B%226051d398b68275966ed27752dd7b21653dee4f3874%22%2C%22updateSchedule%22%5D%2C%5B%2260a4706d1c0e74cd3f1351b96f97833421726f0100%22%2C%22updateRequirements%22%5D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        },
+        "app/add-script/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CMichael%5C%5CDocuments%5C%5CProjekte%5C%5Cscript-runner%5C%5Capp%5C%5Cactions.ts%22%2C%5B%5B%22401e4eb9cf8211aa26a35385e1956e60c15dbc774a%22%2C%22installRequirements%22%5D%2C%5B%22402e96a2c7f5acead208745b7739b834beadc3bb1e%22%2C%22addScript%22%5D%2C%5B%22403639e03eee2e7dbfba0d1b2ae3428102f4763c5d%22%2C%22runScript%22%5D%2C%5B%22601f13a61354003af521c37e152b743af36b85c398%22%2C%22updateScript%22%5D%2C%5B%2260457398054e62348d440a14aaec7bd139bee1f614%22%2C%22updateTags%22%5D%2C%5B%226051d398b68275966ed27752dd7b21653dee4f3874%22%2C%22updateSchedule%22%5D%2C%5B%2260a4706d1c0e74cd3f1351b96f97833421726f0100%22%2C%22updateRequirements%22%5D%5D%5D%5D&__client_imported__=true!",
           "async": false
         }
       },
       "layer": {
-        "app/script/[id]/page": "action-browser"
+        "app/script/[id]/page": "action-browser",
+        "app/add-script/page": "action-browser"
       }
     },
-    "60841d6fa9a1d7bd59db3f85adef9b7b670fa97312": {
+    "6051d398b68275966ed27752dd7b21653dee4f3874": {
       "workers": {
         "app/script/[id]/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CMichael%5C%5CDocuments%5C%5CProjekte%5C%5Cscript-runner%5C%5Capp%5C%5Cactions.ts%22%2C%5B%5B%224006b0e5c6f55fec20495bad4ef8c5902a0505dfa1%22%2C%22installRequirements%22%5D%2C%5B%22405eb1fb7d6dfab1583f2515642ae7e7f31249e2d3%22%2C%22runScript%22%5D%2C%5B%2240d7859363ba2d4ff9bc496ee7a4c212c2277879f2%22%2C%22addScript%22%5D%2C%5B%226018d06f812579d4e41f11dfe39b03a391f634d4ea%22%2C%22updateScript%22%5D%2C%5B%22606eb39504c2e2f3c14c38dca1fac44ceb2376f1f7%22%2C%22updateRequirements%22%5D%2C%5B%2260841d6fa9a1d7bd59db3f85adef9b7b670fa97312%22%2C%22updateTags%22%5D%2C%5B%2260c1b3ff1107885e68862f35f1aa1ce731a63922f9%22%2C%22updateSchedule%22%5D%5D%5D%5D&__client_imported__=true!",
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CMichael%5C%5CDocuments%5C%5CProjekte%5C%5Cscript-runner%5C%5Capp%5C%5Cactions.ts%22%2C%5B%5B%22401e4eb9cf8211aa26a35385e1956e60c15dbc774a%22%2C%22installRequirements%22%5D%2C%5B%22402e96a2c7f5acead208745b7739b834beadc3bb1e%22%2C%22addScript%22%5D%2C%5B%22403639e03eee2e7dbfba0d1b2ae3428102f4763c5d%22%2C%22runScript%22%5D%2C%5B%22601f13a61354003af521c37e152b743af36b85c398%22%2C%22updateScript%22%5D%2C%5B%2260457398054e62348d440a14aaec7bd139bee1f614%22%2C%22updateTags%22%5D%2C%5B%226051d398b68275966ed27752dd7b21653dee4f3874%22%2C%22updateSchedule%22%5D%2C%5B%2260a4706d1c0e74cd3f1351b96f97833421726f0100%22%2C%22updateRequirements%22%5D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        },
+        "app/add-script/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CMichael%5C%5CDocuments%5C%5CProjekte%5C%5Cscript-runner%5C%5Capp%5C%5Cactions.ts%22%2C%5B%5B%22401e4eb9cf8211aa26a35385e1956e60c15dbc774a%22%2C%22installRequirements%22%5D%2C%5B%22402e96a2c7f5acead208745b7739b834beadc3bb1e%22%2C%22addScript%22%5D%2C%5B%22403639e03eee2e7dbfba0d1b2ae3428102f4763c5d%22%2C%22runScript%22%5D%2C%5B%22601f13a61354003af521c37e152b743af36b85c398%22%2C%22updateScript%22%5D%2C%5B%2260457398054e62348d440a14aaec7bd139bee1f614%22%2C%22updateTags%22%5D%2C%5B%226051d398b68275966ed27752dd7b21653dee4f3874%22%2C%22updateSchedule%22%5D%2C%5B%2260a4706d1c0e74cd3f1351b96f97833421726f0100%22%2C%22updateRequirements%22%5D%5D%5D%5D&__client_imported__=true!",
           "async": false
         }
       },
       "layer": {
-        "app/script/[id]/page": "action-browser"
+        "app/script/[id]/page": "action-browser",
+        "app/add-script/page": "action-browser"
       }
     },
-    "60c1b3ff1107885e68862f35f1aa1ce731a63922f9": {
+    "60a4706d1c0e74cd3f1351b96f97833421726f0100": {
       "workers": {
         "app/script/[id]/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CMichael%5C%5CDocuments%5C%5CProjekte%5C%5Cscript-runner%5C%5Capp%5C%5Cactions.ts%22%2C%5B%5B%224006b0e5c6f55fec20495bad4ef8c5902a0505dfa1%22%2C%22installRequirements%22%5D%2C%5B%22405eb1fb7d6dfab1583f2515642ae7e7f31249e2d3%22%2C%22runScript%22%5D%2C%5B%2240d7859363ba2d4ff9bc496ee7a4c212c2277879f2%22%2C%22addScript%22%5D%2C%5B%226018d06f812579d4e41f11dfe39b03a391f634d4ea%22%2C%22updateScript%22%5D%2C%5B%22606eb39504c2e2f3c14c38dca1fac44ceb2376f1f7%22%2C%22updateRequirements%22%5D%2C%5B%2260841d6fa9a1d7bd59db3f85adef9b7b670fa97312%22%2C%22updateTags%22%5D%2C%5B%2260c1b3ff1107885e68862f35f1aa1ce731a63922f9%22%2C%22updateSchedule%22%5D%5D%5D%5D&__client_imported__=true!",
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CMichael%5C%5CDocuments%5C%5CProjekte%5C%5Cscript-runner%5C%5Capp%5C%5Cactions.ts%22%2C%5B%5B%22401e4eb9cf8211aa26a35385e1956e60c15dbc774a%22%2C%22installRequirements%22%5D%2C%5B%22402e96a2c7f5acead208745b7739b834beadc3bb1e%22%2C%22addScript%22%5D%2C%5B%22403639e03eee2e7dbfba0d1b2ae3428102f4763c5d%22%2C%22runScript%22%5D%2C%5B%22601f13a61354003af521c37e152b743af36b85c398%22%2C%22updateScript%22%5D%2C%5B%2260457398054e62348d440a14aaec7bd139bee1f614%22%2C%22updateTags%22%5D%2C%5B%226051d398b68275966ed27752dd7b21653dee4f3874%22%2C%22updateSchedule%22%5D%2C%5B%2260a4706d1c0e74cd3f1351b96f97833421726f0100%22%2C%22updateRequirements%22%5D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        },
+        "app/add-script/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5CMichael%5C%5CDocuments%5C%5CProjekte%5C%5Cscript-runner%5C%5Capp%5C%5Cactions.ts%22%2C%5B%5B%22401e4eb9cf8211aa26a35385e1956e60c15dbc774a%22%2C%22installRequirements%22%5D%2C%5B%22402e96a2c7f5acead208745b7739b834beadc3bb1e%22%2C%22addScript%22%5D%2C%5B%22403639e03eee2e7dbfba0d1b2ae3428102f4763c5d%22%2C%22runScript%22%5D%2C%5B%22601f13a61354003af521c37e152b743af36b85c398%22%2C%22updateScript%22%5D%2C%5B%2260457398054e62348d440a14aaec7bd139bee1f614%22%2C%22updateTags%22%5D%2C%5B%226051d398b68275966ed27752dd7b21653dee4f3874%22%2C%22updateSchedule%22%5D%2C%5B%2260a4706d1c0e74cd3f1351b96f97833421726f0100%22%2C%22updateRequirements%22%5D%5D%5D%5D&__client_imported__=true!",
           "async": false
         }
       },
       "layer": {
-        "app/script/[id]/page": "action-browser"
+        "app/script/[id]/page": "action-browser",
+        "app/add-script/page": "action-browser"
       }
     }
   },
   "edge": {},
-  "encryptionKey": "PoMF1jNnbqAN35IwyXsJbj9ikDvSk8jHs7XCL2OPQK4="
+  "encryptionKey": "4pSjOaeKn2R2WJQooVk18CYOaOB6zlbHyTBaSylqtuA="
 }

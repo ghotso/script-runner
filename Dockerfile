@@ -12,6 +12,9 @@ RUN npm install
 # Copy source
 COPY . .
 
+# Run TypeScript check
+RUN npm run typecheck
+
 # Build application
 RUN npm run build
 

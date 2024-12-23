@@ -1,4 +1,11 @@
 {
+  "app\\add-script\\page.tsx -> @uiw/react-textarea-code-editor": {
+    "id": "app\\add-script\\page.tsx -> @uiw/react-textarea-code-editor",
+    "files": [
+      "static/css/_app-pages-browser_node_modules_uiw_react-textarea-code-editor_esm_index_js.css",
+      "static/chunks/_app-pages-browser_node_modules_uiw_react-textarea-code-editor_esm_index_js.js"
+    ]
+  },
   "app\\script\\[id]\\requirements-editor.tsx -> @uiw/react-textarea-code-editor": {
     "id": "app\\script\\[id]\\requirements-editor.tsx -> @uiw/react-textarea-code-editor",
     "files": [
