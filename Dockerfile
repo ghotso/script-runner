@@ -4,7 +4,7 @@ FROM node:18.18.0-alpine AS builder
 WORKDIR /app
 
 # Install Python and build dependencies
-RUN apk add --no-cache python3 py3-pip make g++
+RUN apk add --no-cache python3 py3-pip make g++ sudo
 
 # Copy package.json
 COPY package.json ./
@@ -33,12 +33,14 @@ RUN npm run build
 # Production stage
 FROM node:18.18.0-alpine AS runner
 
-WORKDIR /app
+WORKDIR /home/scriptrunner/app
 
 ENV NODE_ENV production
 
 # Install Python and other necessary tools, and set up paths properly
-RUN apk add --no-cache python3 py3-pip jq make g++ dcron bash && \
+RUN apk add --no-cache python3 py3-pip jq make g++ dcron bash sudo && \
+    python3 -m ensurepip && \
+    pip3 install --no-cache-dir --upgrade pip setuptools wheel && \
     mkdir -p /home/nextjs/.local/bin && \
     chown -R root:root /home/nextjs && \
     # Remove existing python symlink if it exists
@@ -51,21 +53,23 @@ RUN apk add --no-cache python3 py3-pip jq make g++ dcron bash && \
     echo 'export PATH="/home/nextjs/.local/bin:$PATH"' >> /etc/profile
 
 # Create non-root user
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs && \
-    mkdir -p /data /data/logs /data/logs/runs && \
-    chown -R nextjs:nodejs /data && \
-    chmod -R 755 /data
+RUN adduser -D scriptrunner && \
+    echo "scriptrunner ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/scriptrunner && \
+    chmod 0440 /etc/sudoers.d/scriptrunner
+
+RUN sudo mkdir -p /data /data/logs /data/logs/runs && \
+    sudo chown -R scriptrunner:scriptrunner /data && \
+    sudo chmod -R 755 /data
 
 # Create data volume
 VOLUME /data
 
 # Copy scripts.json to the data directory
-COPY --chown=nextjs:nodejs data/scripts.json /data/scripts.json
+COPY --chown=scriptrunner:scriptrunner data/scripts.json /data/scripts.json
 
 # Add these lines
 RUN touch /data/settings.json && \
-    chown nextjs:nodejs /data/settings.json && \
+    chown scriptrunner:scriptrunner /data/settings.json && \
     chmod 644 /data/settings.json
 
 # Copy built assets
@@ -74,17 +78,17 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
 # Copy and set up start script
-COPY --chown=nextjs:nodejs start.sh ./
+COPY --chown=scriptrunner:scriptrunner start.sh ./
 RUN chmod +x start.sh
 
 # Create .next directory and set permissions
-RUN mkdir -p .next/cache && chown -R nextjs:nodejs .next
+RUN mkdir -p .next/cache && chown -R scriptrunner:scriptrunner .next
 
 # Set up cron job for log rotation
 RUN echo "0 0 * * * /usr/bin/find /data/logs -type f -mtime +7 -delete" > /etc/crontabs/root
 
 # Switch to non-root user
-USER nextjs
+USER scriptrunner
 
 # Set environment variables
 ENV PATH="/home/nextjs/.local/bin:$PATH"
@@ -100,5 +104,5 @@ ENV PIP_USER=false
 EXPOSE 3000
 
 # Start the application using the start script
-CMD ["/bin/bash", "-c", "set -e && ./start.sh"]
+CMD ["/bin/bash", "-c", "sudo -E ./start.sh"]
 

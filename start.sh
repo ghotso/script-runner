@@ -22,38 +22,37 @@ log_message "Log directories created and permissions set"
 
 # Function to install requirements
 install_requirements() {
-  SCRIPTS_FILE=${SCRIPTS_PATH:-/data/scripts.json}
-  log_message "Checking scripts file at: $SCRIPTS_FILE"
-  
-  if [ -f "$SCRIPTS_FILE" ]; then
-      log_message "Found scripts file, extracting requirements..."
-      
-      # Use jq to extract requirements, handle empty arrays
-      REQUIREMENTS=$(jq -r '.scripts[] | select(.requirements != null) | .requirements[]' "$SCRIPTS_FILE" 2>/dev/null | sort -u)
-      
-      if [ $? -eq 0 ] && [ -n "$REQUIREMENTS" ]; then
-          log_message "Found the following requirements to install:"
-          echo "$REQUIREMENTS" | tee -a /data/logs/container.log
-          log_message "Installing requirements..."
-          echo "$REQUIREMENTS" | while read req; do
-              if pip3 show "$req" > /dev/null 2>&1; then
-                  log_message "$req is already installed."
-              else
-                  log_message "Installing: $req"
-                  if pip3 install --no-cache-dir "$req"; then
-                      log_message "$req installed successfully."
-                  else
-                      log_message "Error: Failed to install $req"
-                  fi
-              fi
-          done
-          log_message "All requirements installation attempts completed."
-      else
-          log_message "No requirements found in scripts.json"
-      fi
-  else
-      log_message "Warning: Scripts file not found at: $SCRIPTS_FILE"
-  fi
+    SCRIPTS_FILE=${SCRIPTS_PATH:-/data/scripts.json}
+    log_message "Checking scripts file at: $SCRIPTS_FILE"
+
+    if [ -f "$SCRIPTS_FILE" ]; then
+        log_message "Found scripts file, extracting requirements..."
+        
+        REQUIREMENTS=$(jq -r '.scripts[] | select(.requirements != null) | .requirements[]' "$SCRIPTS_FILE" 2>/dev/null | sort -u)
+        
+        if [ $? -eq 0 ] && [ -n "$REQUIREMENTS" ]; then
+            log_message "Found the following requirements to install:"
+            echo "$REQUIREMENTS" | tee -a /data/logs/container.log
+            log_message "Installing requirements..."
+            echo "$REQUIREMENTS" | while read req; do
+                if pip3 show "$req" > /dev/null 2>&1; then
+                    log_message "$req is already installed."
+                else
+                    log_message "Installing: $req"
+                    if sudo -H pip3 install --no-cache-dir "$req"; then
+                        log_message "$req installed successfully."
+                    else
+                        log_message "Error: Failed to install $req"
+                    fi
+                fi
+            done
+            log_message "All requirements installation attempts completed."
+        else
+            log_message "No requirements found in scripts.json"
+        fi
+    else
+        log_message "Warning: Scripts file not found at: $SCRIPTS_FILE"
+    fi
 }
 
 # Install requirements
@@ -63,9 +62,9 @@ log_message "Requirements installation completed."
 
 # Start cron daemon
 log_message "Starting cron daemon..."
-crond -f &
+sudo crond -f &
 
 # Start the application
 log_message "Starting Node.js application..."
-exec node server.js
+exec sudo -E node server.js
 
