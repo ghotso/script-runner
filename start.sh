@@ -42,7 +42,7 @@ install_requirements() {
                     log_message "$req is already installed."
                 else
                     log_message "Installing: $req"
-                    if pip install --no-cache-dir "$req"; then
+                    if pip install --user --no-cache-dir "$req"; then
                         log_message "$req installed successfully."
                     else
                         log_message "Error: Failed to install $req"

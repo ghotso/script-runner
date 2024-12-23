@@ -63,7 +63,7 @@ export async function installRequirements(scriptId: string) {
   if (script && script.requirements.length > 0) {
     console.log(`Installing requirements for script ${scriptId}: ${script.requirements.join(', ')}`);
     try {
-      const { stdout, stderr } = await execAsync(`${process.env.VIRTUAL_ENV}/bin/pip install --no-cache-dir ${script.requirements.join(' ')}`);
+      const { stdout, stderr } = await execAsync(`${process.env.VIRTUAL_ENV}/bin/pip install --user --no-cache-dir ${script.requirements.join(' ')}`);
       
       if (stderr) {
         console.error('Error installing requirements:', stderr);

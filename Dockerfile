@@ -82,9 +82,9 @@ RUN mkdir -p .next/cache && chown -R scriptrunner:scriptrunner .next
 # Set up cron job for log rotation
 RUN echo "0 0 * * * /usr/bin/find /data/logs -type f -mtime +7 -delete" > /etc/crontabs/root
 
-# Create virtual environment
-RUN python3 -m venv /app/venv
-ENV PATH="/app/venv/bin:$PATH"
+# Create virtual environment and set permissions
+RUN python3 -m venv /app/venv && \
+    chown -R scriptrunner:scriptrunner /app/venv
 
 # Switch to non-root user
 USER scriptrunner
