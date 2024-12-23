@@ -18,6 +18,14 @@ async function ensureScriptsFileExists() {
   const filePath = getScriptsFilePath();
   try {
     await fs.access(filePath);
+    // File exists, let's make sure it's valid JSON
+    const content = await fs.readFile(filePath, 'utf8');
+    try {
+      JSON.parse(content);
+    } catch (parseError) {
+      // If it's not valid JSON, overwrite with a valid empty structure
+      await fs.writeFile(filePath, JSON.stringify({ scripts: [] }, null, 2));
+    }
   } catch (error) {
     // File doesn't exist, create it with an empty scripts array
     await fs.writeFile(filePath, JSON.stringify({ scripts: [] }, null, 2));
@@ -29,7 +37,12 @@ async function getScripts(): Promise<{ scripts: Script[] }> {
   const filePath = getScriptsFilePath();
   try {
     const fileContents = await fs.readFile(filePath, 'utf8');
-    return JSON.parse(fileContents) || { scripts: [] };
+    const parsedContents = JSON.parse(fileContents);
+    if (!parsedContents.scripts) {
+      parsedContents.scripts = [];
+      await fs.writeFile(filePath, JSON.stringify(parsedContents, null, 2));
+    }
+    return parsedContents;
   } catch (error) {
     console.error('Error reading scripts file:', error);
     return { scripts: [] };
