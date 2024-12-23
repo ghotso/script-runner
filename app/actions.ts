@@ -1,7 +1,5 @@
 'use server'
 
-import fs from 'fs/promises';
-import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { Script, Log } from '@/types/script';
@@ -9,71 +7,40 @@ import { Settings } from '@/types/settings';
 
 const execAsync = promisify(exec);
 
-const getScriptsFilePath = () => {
-  return process.env.NODE_ENV === 'production'
-    ? process.env.SCRIPTS_PATH || '/data/scripts.json'
-    : path.join(process.cwd(), 'data', 'scripts.json');
-};
-
-async function ensureScriptsFileExists() {
-  const filePath = getScriptsFilePath();
-  try {
-    await fs.access(filePath);
-    // File exists, let's make sure it's valid JSON
-    const content = await fs.readFile(filePath, 'utf8');
-    try {
-      JSON.parse(content);
-    } catch (parseError) {
-      // If it's not valid JSON, overwrite with a valid empty structure
-      await fs.writeFile(filePath, JSON.stringify({ scripts: [] }, null, 2));
-    }
-  } catch (error) {
-    // File doesn't exist, create it with an empty scripts array
-    await fs.writeFile(filePath, JSON.stringify({ scripts: [] }, null, 2));
-  }
-}
-
 async function getScripts(): Promise<Script[]> {
-  await ensureScriptsFileExists();
-  const filePath = getScriptsFilePath();
-  try {
-    const fileContents = await fs.readFile(filePath, 'utf8');
-    const parsedContents = JSON.parse(fileContents);
-    if (!parsedContents.scripts) {
-      parsedContents.scripts = [];
-      await fs.writeFile(filePath, JSON.stringify(parsedContents, null, 2));
-    }
-    return parsedContents.scripts;
-  } catch (error) {
-    console.error('Error reading scripts file:', error);
-    return [];
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/scripts`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch scripts');
   }
+  return response.json();
 }
 
-async function saveScripts(scripts: Script[]) {
-  const filePath = getScriptsFilePath();
-  await fs.writeFile(filePath, JSON.stringify({ scripts }, null, 2));
+async function saveScript(script: Script) {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/scripts/${script.id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(script),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to save script');
+  }
+  return response.json();
 }
 
 export async function addScript(script: Omit<Script, 'id' | 'logs'>) {
-  const scripts = await getScripts();
-
-  const newScript: Script = {
-    ...script,
-    id: (scripts.length + 1).toString(),
-    logs: []
-  };
-
-  scripts.push(newScript);
-
-  await saveScripts(scripts);
-
-  // Make the script executable if it's a bash script
-  if (newScript.type === 'bash') {
-    const scriptPath = path.join('/data', `script_${newScript.id}.sh`);
-    await fs.writeFile(scriptPath, newScript.content);
-    await fs.chmod(scriptPath, '755');
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/scripts`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(script),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to add script');
   }
+  return response.json();
 }
 
 export async function updateScript(scriptId: string, content: string) {
@@ -81,7 +48,7 @@ export async function updateScript(scriptId: string, content: string) {
   const script = scripts.find((s: Script) => s.id === scriptId);
   if (script) {
     script.content = content;
-    await saveScripts(scripts);
+    await saveScript(script);
   }
 }
 
@@ -90,7 +57,7 @@ export async function updateRequirements(scriptId: string, requirements: string[
   const script = scripts.find((s: Script) => s.id === scriptId);
   if (script) {
     script.requirements = requirements;
-    await saveScripts(scripts);
+    await saveScript(script);
   }
 }
 
@@ -100,9 +67,6 @@ export async function installRequirements(scriptId: string) {
   if (script && script.requirements.length > 0) {
     console.log(`Installing requirements for script ${scriptId}: ${script.requirements.join(', ')}`);
     try {
-      const requirementsFile = path.join('/tmp', `requirements_${scriptId}.txt`);
-      await fs.writeFile(requirementsFile, script.requirements.join('\n'));
-      
       const { stdout } = await execAsync(`${process.env.PYTHON_PATH || 'python3'} -m pip freeze`);
       const installedPackages = new Set(stdout.split('\n').map((pkg: string) => pkg.split('==')[0].toLowerCase()));
       const packagesToInstall = script.requirements.filter((req: string) => 
@@ -117,7 +81,7 @@ export async function installRequirements(scriptId: string) {
       }
       
       const { stdout: installStdout, stderr: installStderr } = await execAsync(
-        `${process.env.PYTHON_PATH || 'python3'} -m pip install -r ${requirementsFile}`
+        `${process.env.PYTHON_PATH || 'python3'} -m pip install ${packagesToInstall.join(' ')}`
       );
       
       if (installStderr) {
@@ -152,7 +116,7 @@ export async function updateSchedule(scriptId: string, schedules: string) {
   const script = scripts.find((s: Script) => s.id === scriptId);
   if (script) {
     script.schedule = schedules;
-    await saveScripts(scripts);
+    await saveScript(script);
   }
 }
 
@@ -161,7 +125,7 @@ export async function updateTags(scriptId: string, tags: string[]) {
   const script = scripts.find((s: Script) => s.id === scriptId);
   if (script) {
     script.tags = tags;
-    await saveScripts(scripts);
+    await saveScript(script);
   }
 }
 
@@ -205,76 +169,65 @@ export async function runScript(scriptId: string) {
   script.logs.push(newLog);
   script.logs = script.logs.slice(-12);
 
-  await saveScripts(scripts);
+  await saveScript(script);
 
   return output;
 }
 
 async function executePythonScript(content: string) {
-  const tempScriptPath = path.join('/tmp', `script_${Date.now()}.py`);
-  await fs.writeFile(tempScriptPath, content);
-  try {
-    const { stdout, stderr } = await execAsync(`${process.env.PYTHON_PATH || 'python3'} ${tempScriptPath}`);
-    if (stderr) {
-      console.error('Python script error:', stderr);
-    }
-    return stdout;
-  } finally {
-    await fs.unlink(tempScriptPath);
+  const { stdout, stderr } = await execAsync(`${process.env.PYTHON_PATH || 'python3'} -c "${content}"`);
+  if (stderr) {
+    console.error('Python script error:', stderr);
   }
+  return stdout;
 }
 
 async function executeBashScript(content: string) {
-  const tempScriptPath = path.join('/tmp', `script_${Date.now()}.sh`);
-  await fs.writeFile(tempScriptPath, content);
-  await fs.chmod(tempScriptPath, '755');
-  try {
-    const { stdout, stderr } = await execAsync(tempScriptPath);
-    if (stderr) {
-      console.error('Bash script error:', stderr);
-    }
-    return stdout;
-  } finally {
-    await fs.unlink(tempScriptPath);
+  const { stdout, stderr } = await execAsync(`bash -c "${content}"`);
+  if (stderr) {
+    console.error('Bash script error:', stderr);
   }
+  return stdout;
 }
 
 export async function deleteScript(scriptId: string) {
-  const scripts = await getScripts();
-  const updatedScripts = scripts.filter((s: Script) => s.id !== scriptId);
-  await saveScripts(updatedScripts);
-}
-
-const getSettingsFilePath = () => {
-  return process.env.NODE_ENV === 'production'
-    ? process.env.SETTINGS_PATH || '/data/settings.json'
-    : path.join(process.cwd(), 'data', 'settings.json');
-};
-
-async function ensureSettingsFileExists() {
-  const filePath = getSettingsFilePath();
-  try {
-    await fs.access(filePath);
-  } catch (error) {
-    await fs.writeFile(filePath, JSON.stringify({ discordWebhook: '' }, null, 2));
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/scripts/${scriptId}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    throw new Error('Failed to delete script');
   }
 }
 
+// Settings-related functions
+
+async function getSettingsFromAPI(): Promise<Settings> {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/settings`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch settings');
+  }
+  return response.json();
+}
+
 export async function getSettings(): Promise<Settings> {
-  await ensureSettingsFileExists();
-  const filePath = getSettingsFilePath();
-  const fileContents = await fs.readFile(filePath, 'utf8');
-  return JSON.parse(fileContents);
+  return getSettingsFromAPI();
 }
 
 export async function updateSettings(settings: Settings) {
-  await ensureSettingsFileExists();
-  const filePath = getSettingsFilePath();
-  await fs.writeFile(filePath, JSON.stringify(settings, null, 2));
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/settings`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(settings),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to update settings');
+  }
 }
 
 async function sendDiscordNotification(script: Script, startTime: Date, output: string) {
-  const settings = await getSettings();
+  const settings = await getSettingsFromAPI();
   if (!settings.discordWebhook) {
     console.log('Discord webhook not configured. Skipping notification.');
     return;
