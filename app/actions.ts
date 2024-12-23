@@ -1,3 +1,5 @@
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
 'use server'
 
 import { exec } from 'child_process';
@@ -8,7 +10,7 @@ import { Settings } from '@/types/settings';
 const execAsync = promisify(exec);
 
 async function getScripts(): Promise<Script[]> {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/scripts`);
+  const response = await fetch(`${API_BASE_URL}/api/scripts`);
   if (!response.ok) {
     throw new Error('Failed to fetch scripts');
   }
@@ -16,7 +18,7 @@ async function getScripts(): Promise<Script[]> {
 }
 
 async function saveScript(script: Script) {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/scripts/${script.id}`, {
+  const response = await fetch(`${API_BASE_URL}/api/scripts/${script.id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -30,7 +32,7 @@ async function saveScript(script: Script) {
 }
 
 export async function addScript(script: Omit<Script, 'id' | 'logs'>) {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/scripts`, {
+  const response = await fetch(`${API_BASE_URL}/api/scripts`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -191,7 +193,7 @@ async function executeBashScript(content: string) {
 }
 
 export async function deleteScript(scriptId: string) {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/scripts/${scriptId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/scripts/${scriptId}`, {
     method: 'DELETE',
   });
   if (!response.ok) {
@@ -202,7 +204,7 @@ export async function deleteScript(scriptId: string) {
 // Settings-related functions
 
 async function getSettingsFromAPI(): Promise<Settings> {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/settings`);
+  const response = await fetch(`${API_BASE_URL}/api/settings`);
   if (!response.ok) {
     throw new Error('Failed to fetch settings');
   }
@@ -214,7 +216,7 @@ export async function getSettings(): Promise<Settings> {
 }
 
 export async function updateSettings(settings: Settings) {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/settings`, {
+  const response = await fetch(`${API_BASE_URL}/api/settings`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
