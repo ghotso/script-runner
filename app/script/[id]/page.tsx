@@ -45,8 +45,8 @@ export default async function ScriptDetail({ params }: PageProps) {
             <h3 className="text-lg font-semibold text-white mb-2">Tags</h3>
             <TagEditor script={script} />
           </div>
-          <ScriptEditor script={script} />
           <RequirementsEditor script={script} />
+          <ScriptEditor script={script} />
           <ScheduleManager script={script} />
           <LogViewer logs={script.logs || []} />
         </CardContent>

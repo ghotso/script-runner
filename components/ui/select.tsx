@@ -1,10 +1,10 @@
 import * as React from "react"
 
-interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
-  onValueChange?: (value: string) => void;
+interface SelectProps<T extends string> extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  onValueChange?: (value: T) => void;
 }
 
-export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
+export const Select = React.forwardRef<HTMLSelectElement, SelectProps<string>>(
   ({ className = '', onValueChange, ...props }, ref) => {
     return (
       <select

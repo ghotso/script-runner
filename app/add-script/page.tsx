@@ -11,12 +11,13 @@ import { Save } from 'lucide-react';
 import { addScript } from '../actions';
 import { TagEditor } from '@/components/tag-editor';
 import dynamic from 'next/dynamic';
+import { Script } from '@/types/script';
 
 const CodeEditor = dynamic(() => import('@uiw/react-textarea-code-editor').then((mod) => mod.default), { ssr: false });
 
 export default function AddScript() {
   const [name, setName] = useState('');
-  const [type, setType] = useState('python');
+  const [type, setType] = useState<'python' | 'bash'>('python');
   const [content, setContent] = useState('');
   const [requirements, setRequirements] = useState('');
   const [tags, setTags] = useState<string[]>([]);
@@ -29,7 +30,8 @@ export default function AddScript() {
       type,
       content,
       requirements: requirements.split('\n').filter(r => r.trim() !== ''),
-      tags
+      tags,
+      schedule: ''
     });
     router.push('/');
   };
@@ -57,7 +59,7 @@ export default function AddScript() {
               <Select
                 id="type"
                 value={type}
-                onValueChange={setType}
+                onValueChange={(value) => setType(value as 'python' | 'bash')}
                 className="bg-white/5 border-white/10"
               >
                 <option value="python">Python</option>
@@ -65,13 +67,13 @@ export default function AddScript() {
               </Select>
             </div>
             <div>
-              <Label htmlFor="content" className="text-white">Script Content</Label>
+              <Label htmlFor="requirements" className="text-white">Requirements (one per line)</Label>
               <div className="mt-1.5">
                 <CodeEditor
-                  value={content}
-                  language={type === 'python' ? 'python' : 'shell'}
-                  placeholder="Enter your script content here..."
-                  onChange={(evn) => setContent(evn.target.value)}
+                  value={requirements}
+                  language="python"
+                  placeholder="Enter your requirements here..."
+                  onChange={(evn) => setRequirements(evn.target.value)}
                   padding={15}
                   style={{
                     fontSize: 12,
@@ -85,13 +87,13 @@ export default function AddScript() {
               </div>
             </div>
             <div>
-              <Label htmlFor="requirements" className="text-white">Requirements (one per line)</Label>
+              <Label htmlFor="content" className="text-white">Script Content</Label>
               <div className="mt-1.5">
                 <CodeEditor
-                  value={requirements}
-                  language="python"
-                  placeholder="Enter your requirements here..."
-                  onChange={(evn) => setRequirements(evn.target.value)}
+                  value={content}
+                  language={type}
+                  placeholder="Enter your script content here..."
+                  onChange={(evn) => setContent(evn.target.value)}
                   padding={15}
                   style={{
                     fontSize: 12,

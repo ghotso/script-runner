@@ -48,7 +48,7 @@ export async function addScript(script: Omit<Script, 'id' | 'logs'>) {
 
 export async function updateScript(scriptId: string, content: string) {
   const data = await getScripts();
-  const script = data.scripts.find((s: any) => s.id === scriptId);
+  const script = data.scripts.find((s: Script) => s.id === scriptId);
   if (script) {
     script.content = content;
     await saveScripts(data);
@@ -57,7 +57,7 @@ export async function updateScript(scriptId: string, content: string) {
 
 export async function updateRequirements(scriptId: string, requirements: string[]) {
   const data = await getScripts();
-  const script = data.scripts.find((s: any) => s.id === scriptId);
+  const script = data.scripts.find((s: Script) => s.id === scriptId);
   if (script) {
     script.requirements = requirements;
     await saveScripts(data);
@@ -66,7 +66,7 @@ export async function updateRequirements(scriptId: string, requirements: string[
 
 export async function installRequirements(scriptId: string) {
   const data = await getScripts();
-  const script = data.scripts.find((s: any) => s.id === scriptId);
+  const script = data.scripts.find((s: Script) => s.id === scriptId);
   if (script && script.requirements.length > 0) {
     console.log(`Installing requirements for script ${scriptId}: ${script.requirements.join(', ')}`);
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -75,7 +75,7 @@ export async function installRequirements(scriptId: string) {
 
 export async function updateSchedule(scriptId: string, schedule: string) {
   const data = await getScripts();
-  const script = data.scripts.find((s: any) => s.id === scriptId);
+  const script = data.scripts.find((s: Script) => s.id === scriptId);
   if (script) {
     script.schedule = schedule;
     await saveScripts(data);
@@ -84,7 +84,7 @@ export async function updateSchedule(scriptId: string, schedule: string) {
 
 export async function updateTags(scriptId: string, tags: string[]) {
   const data = await getScripts();
-  const script = data.scripts.find((s: any) => s.id === scriptId);
+  const script = data.scripts.find((s: Script) => s.id === scriptId);
   if (script) {
     script.tags = tags;
     await saveScripts(data);
@@ -93,7 +93,7 @@ export async function updateTags(scriptId: string, tags: string[]) {
 
 export async function runScript(scriptId: string) {
   const data = await getScripts();
-  const script = data.scripts.find((s: any) => s.id === scriptId);
+  const script = data.scripts.find((s: Script) => s.id === scriptId);
   
   if (!script) {
     throw new Error('Script not found');
@@ -161,5 +161,11 @@ async function executeBashScript(content: string) {
   } finally {
     await fs.unlink(tempScriptPath);
   }
+}
+
+export async function deleteScript(scriptId: string) {
+  const data = await getScripts();
+  data.scripts = data.scripts.filter((s: Script) => s.id !== scriptId);
+  await saveScripts(data);
 }
 
