@@ -131,19 +131,19 @@ export async function updateTags(scriptId: string, tags: string[]) {
 }
 
 export async function runScript(scriptId: string) {
-  const scripts = await getScripts();
-  const script = scripts.find((s: Script) => s.id === scriptId);
-
-  if (!script) {
-    throw new Error('Script not found');
-  }
-
-  console.log(`Running script: ${script.name}`);
-  const startTime = new Date();
-  let status = 'Completed';
-  let output = '';
-
   try {
+    const scripts = await getScripts();
+    const script = scripts.find((s: Script) => s.id === scriptId);
+
+    if (!script) {
+      throw new Error('Script not found');
+    }
+
+    console.log(`Running script: ${script.name}`);
+    const startTime = new Date();
+    let status = 'Completed';
+    let output = '';
+
     if (script.type === 'python') {
       output = await executePythonScript(script.content);
     } else if (script.type === 'bash') {
@@ -151,28 +151,27 @@ export async function runScript(scriptId: string) {
     } else {
       throw new Error('Unsupported script type');
     }
+
+    const endTime = new Date();
+    const duration = endTime.getTime() - startTime.getTime();
+
+    const newLog: Log = {
+      timestamp: startTime.toISOString(),
+      status: status,
+      duration: duration,
+      output: output || 'Script executed successfully with no output'
+    };
+
+    script.logs.push(newLog);
+    script.logs = script.logs.slice(-12);
+
+    await saveScript(script);
+
+    return { success: true, output };
   } catch (error: any) {
-    status = 'Failed';
-    output = error.message;
-    await sendDiscordNotification(script, startTime, output);
+    console.error('Error running script:', error);
+    return { success: false, error: error.message };
   }
-
-  const endTime = new Date();
-  const duration = endTime.getTime() - startTime.getTime();
-
-  const newLog: Log = {
-    timestamp: startTime.toISOString(),
-    status: status,
-    duration: duration,
-    output: output || 'Script executed successfully with no output'
-  };
-
-  script.logs.push(newLog);
-  script.logs = script.logs.slice(-12);
-
-  await saveScript(script);
-
-  return output;
 }
 
 async function executePythonScript(content: string) {

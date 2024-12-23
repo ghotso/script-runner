@@ -5,7 +5,7 @@ import ScriptEditor from './script-editor';
 import RequirementsEditor from './requirements-editor';
 import LogViewer from './log-viewer';
 import SettingsCard from './settings-card';
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import dynamic from 'next/dynamic';
 import DeleteScriptButton from './delete-script-button';
 import { Script } from '@/types/script';
@@ -17,6 +17,12 @@ interface ScriptDetailClientProps {
 }
 
 export default function ScriptDetailClient({ script }: ScriptDetailClientProps) {
+  const [logKey, setLogKey] = useState(Date.now());
+
+  const refreshLogs = () => {
+    setLogKey(Date.now());
+  };
+
   return (
     <div className="container mx-auto p-4">
       <Card className="bg-card text-card-foreground backdrop-blur-md bg-white/10 border-white/20">
@@ -27,7 +33,7 @@ export default function ScriptDetailClient({ script }: ScriptDetailClientProps) 
           </div>
           <div className="flex gap-2">
             <Suspense fallback={<div>Loading...</div>}>
-              <ClientScriptRunner script={script} refreshLogs={() => {}} />
+              <ClientScriptRunner script={script} refreshLogs={refreshLogs} />
             </Suspense>
             <DeleteScriptButton scriptId={script.id} />
           </div>
@@ -37,7 +43,7 @@ export default function ScriptDetailClient({ script }: ScriptDetailClientProps) 
           <RequirementsEditor script={script} />
           <ScriptEditor script={script} />
           <Suspense fallback={<div>Loading logs...</div>}>
-            <LogViewer scriptId={script.id} key={Date.now()} />
+            <LogViewer scriptId={script.id} key={logKey} />
           </Suspense>
         </CardContent>
       </Card>

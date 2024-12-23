@@ -50,22 +50,11 @@ export default function LogViewer({ scriptId }: LogViewerProps) {
   const getStatusIcon = (status: string) => {
     switch (status.toLowerCase()) {
       case 'completed':
-        return <CheckCircle2 className="w-5 h-5" />;
+        return <CheckCircle2 className="w-5 h-5 text-green-500" />;
       case 'failed':
-        return <XCircle className="w-5 h-5" />;
+        return <XCircle className="w-5 h-5 text-red-500" />;
       default:
-        return <Clock className="w-5 h-5" />;
-    }
-  };
-
-  const getStatusStyles = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return 'bg-emerald-500 text-white';
-      case 'failed':
-        return 'bg-red-500 text-white';
-      default:
-        return 'bg-yellow-500 text-white';
+        return <Clock className="w-5 h-5 text-yellow-500" />;
     }
   };
 
@@ -102,9 +91,7 @@ export default function LogViewer({ scriptId }: LogViewerProps) {
                   className="group relative overflow-hidden rounded-lg border border-white/10 bg-white/5 p-6 hover:bg-white/10 transition-all duration-200"
                 >
                   <div className="absolute right-4 top-4">
-                    <div className={`rounded-full p-2 ${getStatusStyles(log.status)}`}>
-                      {getStatusIcon(log.status)}
-                    </div>
+                    {getStatusIcon(log.status)}
                   </div>
                   <div className="pr-12">
                     <time className="text-sm text-gray-400">
@@ -125,9 +112,7 @@ export default function LogViewer({ scriptId }: LogViewerProps) {
               <DialogContent className="sm:max-w-2xl bg-gray-900/95 backdrop-blur-xl border-gray-800">
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2 text-white">
-                    <div className={`rounded-full p-1.5 ${getStatusStyles(log.status)}`}>
-                      {getStatusIcon(log.status)}
-                    </div>
+                    {getStatusIcon(log.status)}
                     Execution Details
                     <span className="ml-auto text-sm font-normal text-gray-400">
                       {formatDistanceToNow(new Date(log.timestamp))} ago
@@ -140,7 +125,7 @@ export default function LogViewer({ scriptId }: LogViewerProps) {
                       <p className="text-sm text-gray-400">Status</p>
                       <p className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-sm font-medium ${
                         log.status.toLowerCase() === 'completed' 
-                          ? 'bg-emerald-500/10 text-emerald-400'
+                          ? 'bg-green-500/10 text-green-400'
                           : 'bg-red-500/10 text-red-400'
                       }`}>
                         {getStatusIcon(log.status)}

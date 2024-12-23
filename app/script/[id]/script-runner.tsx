@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Play, Loader2 } from 'lucide-react';
 import { runScript } from '../../actions';
 import { Script } from '@/types/script';
+import { toast } from 'react-hot-toast';
 
 interface ScriptRunnerProps {
   script: Script;
@@ -12,51 +13,42 @@ interface ScriptRunnerProps {
 }
 
 export default function ScriptRunner({ script, refreshLogs }: ScriptRunnerProps) {
-  const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
 
   const handleRun = async () => {
     setIsRunning(true);
-    setOutput('Running script...');
     try {
       const result = await runScript(script.id);
-      setOutput(result);
-    } catch (error: unknown) {
-      setOutput(`Error: ${error instanceof Error ? error.message : String(error)}`);
+      if (result.success) {
+        toast.success('Script executed successfully');
+      } else {
+        toast.error(`Error: ${result.error}`);
+      }
+    } catch (error: any) {
+      toast.error(`Error: ${error.message}`);
     }
     setIsRunning(false);
-    // Trigger a re-render of the parent component
     refreshLogs();
   };
 
   return (
-    <div>
-      <Button 
-        onClick={handleRun} 
-        disabled={isRunning}
-        className="w-32"
-      >
-        {isRunning ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Running
-          </>
-        ) : (
-          <>
-            <Play className="mr-2 h-4 w-4" />
-            Run Script
-          </>
-        )}
-      </Button>
-      {output && (
-        <div className="mt-4">
-          <h3 className="text-lg font-semibold text-white">Output:</h3>
-          <pre className="bg-gray-900 text-white p-2 rounded mt-2 overflow-x-auto whitespace-pre-wrap">
-            {output}
-          </pre>
-        </div>
+    <Button 
+      onClick={handleRun} 
+      disabled={isRunning}
+      className="w-32"
+    >
+      {isRunning ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Running
+        </>
+      ) : (
+        <>
+          <Play className="mr-2 h-4 w-4" />
+          Run Script
+        </>
       )}
-    </div>
+    </Button>
   );
 }
 
