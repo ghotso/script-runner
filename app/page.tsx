@@ -2,12 +2,12 @@ import { getScripts } from '@/lib/scripts'
 import ScriptList from './components/script-list'
 
 export default async function Home() {
-  const scripts = await getScripts();
+  const initialScripts = await getScripts();
 
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-8 text-center">Script Runner</h1>
-      <ScriptList initialScripts={scripts} />
+      <ScriptList initialScripts={initialScripts} />
     </div>
   );
 }

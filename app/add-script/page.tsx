@@ -12,6 +12,7 @@ import { addScript } from '../actions';
 import { TagEditor } from '@/components/tag-editor';
 import dynamic from 'next/dynamic';
 import { Script } from '@/types/script';
+import { useToast } from "@/components/ui/use-toast";
 
 const CodeEditor = dynamic(() => import('@uiw/react-textarea-code-editor').then((mod) => mod.default), { ssr: false });
 
@@ -22,18 +23,39 @@ export default function AddScript() {
   const [requirements, setRequirements] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const router = useRouter();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await addScript({
-      name,
-      type,
-      content,
-      requirements: requirements.split('\n').filter(r => r.trim() !== ''),
-      tags,
-      schedule: ''
-    });
-    router.push('/');
+    try {
+      const newScript = await addScript({
+        name,
+        type,
+        content,
+        requirements: requirements.split('\n').filter(r => r.trim() !== ''),
+        tags,
+        schedule: ''
+      });
+
+      // Update the cache with the new script
+      const existingScripts = JSON.parse(localStorage.getItem('scripts') || '[]');
+      localStorage.setItem('scripts', JSON.stringify([...existingScripts, newScript]));
+
+      toast({
+        title: "Script added",
+        description: "Your new script has been added successfully.",
+      });
+
+      router.push('/');
+      router.refresh(); // Force a refresh of the page data
+    } catch (error) {
+      console.error('Error adding script:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add the script. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

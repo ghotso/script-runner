@@ -20,8 +20,17 @@ export default function ScriptList({ initialScripts }: ScriptListProps) {
   const [scripts, setScripts] = useState<Script[]>(initialScripts)
 
   useEffect(() => {
-    console.log('Initial scripts:', initialScripts);
-  }, [initialScripts]);
+    // Load scripts from localStorage if available
+    const cachedScripts = localStorage.getItem('scripts');
+    if (cachedScripts) {
+      setScripts(JSON.parse(cachedScripts));
+    }
+  }, []);
+
+  useEffect(() => {
+    // Save scripts to localStorage whenever they change
+    localStorage.setItem('scripts', JSON.stringify(scripts));
+  }, [scripts]);
 
   // Get unique tags from all scripts
   const allTags = Array.from(new Set(scripts.flatMap(script => script.tags)))

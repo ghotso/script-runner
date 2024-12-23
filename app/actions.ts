@@ -8,32 +8,11 @@ import { Script, Log } from '@/types/script';
 import { Settings } from '@/types/settings';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
 const execAsync = promisify(exec);
 
 const LOGS_PATH = process.env.LOGS_PATH || '/data/logs';
 const RUNS_LOGS_PATH = process.env.RUNS_LOGS_PATH || '/data/logs/runs';
-
-async function getScripts(): Promise<Script[]> {
-  const response = await fetch(`${API_BASE_URL}/api/scripts`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch scripts');
-  }
-  return response.json();
-}
-
-async function saveScript(script: Script) {
-  const response = await fetch(`${API_BASE_URL}/api/scripts/${script.id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(script),
-  });
-  if (!response.ok) {
-    throw new Error('Failed to save script');
-  }
-  return response.json();
-}
 
 export async function addScript(script: Omit<Script, 'id' | 'logs'>) {
   const response = await fetch(`${API_BASE_URL}/api/scripts`, {
@@ -46,7 +25,8 @@ export async function addScript(script: Omit<Script, 'id' | 'logs'>) {
   if (!response.ok) {
     throw new Error('Failed to add script');
   }
-  return response.json();
+  const newScript = await response.json();
+  return newScript;
 }
 
 export async function updateScript(scriptId: string, content: string) {
@@ -133,59 +113,6 @@ export async function updateTags(scriptId: string, tags: string[]) {
     script.tags = tags;
     await saveScript(script);
   }
-}
-
-async function writeToLogFile(content: string) {
-  try {
-    const timestamp = new Date().toISOString().split('T')[0]; // Get current date
-    const logFileName = `${timestamp}.log`;
-    const logFilePath = path.join(LOGS_PATH, logFileName);
-    await fs.mkdir(path.dirname(logFilePath), { recursive: true });
-    await fs.appendFile(logFilePath, content + '\n');
-
-    // Implement log rotation for container logs (keep last 7 days)
-    const logFiles = await fs.readdir(LOGS_PATH);
-    const dateThreshold = new Date();
-    dateThreshold.setDate(dateThreshold.getDate() - 7);
-
-    for (const file of logFiles) {
-      const filePath = path.join(LOGS_PATH, file);
-      const stats = await fs.stat(filePath);
-      if (stats.isFile() && stats.mtime < dateThreshold) {
-        await fs.unlink(filePath);
-      }
-    }
-  } catch (error) {
-    console.error('Error writing to log file:', error);
-  }
-}
-
-async function writeToRunLogFile(scriptId: string, content: string) {
-    try {
-        const timestamp = new Date().toISOString().replace(/:/g, '-');
-        const logFileName = `${scriptId}_${timestamp}.log`;
-        const logFilePath = path.join(RUNS_LOGS_PATH, logFileName);
-        await fs.mkdir(path.dirname(logFilePath), { recursive: true });
-        await fs.writeFile(logFilePath, content);
-
-        // Implement log rotation for run logs (keep last 20 logs)
-        const logFiles = await fs.readdir(RUNS_LOGS_PATH);
-        const scriptLogs = logFiles.filter(file => file.startsWith(`${scriptId}_`));
-        
-        if (scriptLogs.length > 20) {
-            scriptLogs.sort((a, b) => {
-                const timeA = a.split('_')[1].split('.')[0];
-                const timeB = b.split('_')[1].split('.')[0];
-                return new Date(timeB).getTime() - new Date(timeA).getTime();
-            });
-
-            for (let i = 20; i < scriptLogs.length; i++) {
-                await fs.unlink(path.join(RUNS_LOGS_PATH, scriptLogs[i]));
-            }
-        }
-    } catch (error) {
-        console.error('Error writing to run log file:', error);
-    }
 }
 
 export async function runScript(scriptId: string) {
@@ -283,37 +210,7 @@ ${errorOutput}
     }
 }
 
-async function executePythonScript(content: string) {
-  try {
-    const escapedContent = content.replace(/"/g, '\\"');
-    const { stdout, stderr } = await execAsync(`${process.env.PYTHON_PATH || 'python3'} -c "${escapedContent}"`);
-    if (stderr) {
-      console.error('Python script error:', stderr);
-      return stderr;
-    }
-    return stdout;
-  } catch (error: any) {
-    console.error('Error executing Python script:', error);
-    return error.message;
-  }
-}
-
-async function executeBashScript(content: string) {
-  try {
-    const escapedContent = content.replace(/"/g, '\\"');
-    const { stdout, stderr } = await execAsync(`bash -c "${escapedContent}"`);
-    if (stderr) {
-      console.error('Bash script error:', stderr);
-      return stderr;
-    }
-    return stdout;
-  } catch (error: any) {
-    console.error('Error executing Bash script:', error);
-    return error.message;
-  }
-}
-
-export async function deleteScript(scriptId: string) {
+export async function deleteScript(scriptId: string): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/api/scripts/${scriptId}`, {
     method: 'DELETE',
   });
@@ -322,21 +219,11 @@ export async function deleteScript(scriptId: string) {
   }
 }
 
-// Settings-related functions
-
-async function getSettingsFromAPI(): Promise<Settings> {
-  const response = await fetch(`${API_BASE_URL}/api/settings`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch settings');
-  }
-  return response.json();
-}
-
 export async function getSettings(): Promise<Settings> {
   return getSettingsFromAPI();
 }
 
-export async function updateSettings(settings: Settings) {
+export async function updateSettings(settings: Settings): Promise<Settings> {
   const response = await fetch(`${API_BASE_URL}/api/settings`, {
     method: 'PUT',
     headers: {
@@ -347,9 +234,10 @@ export async function updateSettings(settings: Settings) {
   if (!response.ok) {
     throw new Error('Failed to update settings');
   }
+  return response.json();
 }
 
-async function sendDiscordNotification(script: Script, startTime: Date, output: string) {
+export async function sendDiscordNotification(script: Script, startTime: Date, output: string) {
     const settings = await getSettingsFromAPI();
     if (!settings.discordWebhook) {
         console.log('Discord webhook not configured. Skipping notification.');
@@ -402,5 +290,119 @@ async function sendDiscordNotification(script: Script, startTime: Date, output: 
     } catch (error) {
         console.error('Error sending Discord notification:', error);
     }
+}
+
+
+async function getScripts(): Promise<Script[]> {
+  const response = await fetch(`${API_BASE_URL}/api/scripts`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch scripts');
+  }
+  return response.json();
+}
+
+async function saveScript(script: Script) {
+  const response = await fetch(`${API_BASE_URL}/api/scripts/${script.id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(script),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to save script');
+  }
+  return response.json();
+}
+
+async function writeToLogFile(content: string) {
+  try {
+    const timestamp = new Date().toISOString().split('T')[0]; // Get current date
+    const logFileName = `${timestamp}.log`;
+    const logFilePath = path.join(LOGS_PATH, logFileName);
+    await fs.mkdir(path.dirname(logFilePath), { recursive: true });
+    await fs.appendFile(logFilePath, content + '\n');
+
+    // Implement log rotation for container logs (keep last 7 days)
+    const logFiles = await fs.readdir(LOGS_PATH);
+    const dateThreshold = new Date();
+    dateThreshold.setDate(dateThreshold.getDate() - 7);
+
+    for (const file of logFiles) {
+      const filePath = path.join(LOGS_PATH, file);
+      const stats = await fs.stat(filePath);
+      if (stats.isFile() && stats.mtime < dateThreshold) {
+        await fs.unlink(filePath);
+      }
+    }
+  } catch (error) {
+    console.error('Error writing to log file:', error);
+  }
+}
+
+async function writeToRunLogFile(scriptId: string, content: string) {
+    try {
+        const timestamp = new Date().toISOString().replace(/:/g, '-');
+        const logFileName = `${scriptId}_${timestamp}.log`;
+        const logFilePath = path.join(RUNS_LOGS_PATH, logFileName);
+        await fs.mkdir(path.dirname(logFilePath), { recursive: true });
+        await fs.writeFile(logFilePath, content);
+
+        // Implement log rotation for run logs (keep last 20 logs)
+        const logFiles = await fs.readdir(RUNS_LOGS_PATH);
+        const scriptLogs = logFiles.filter(file => file.startsWith(`${scriptId}_`));
+        
+        if (scriptLogs.length > 20) {
+            scriptLogs.sort((a, b) => {
+                const timeA = a.split('_')[1].split('.')[0];
+                const timeB = b.split('_')[1].split('.')[0];
+                return new Date(timeB).getTime() - new Date(timeA).getTime();
+            });
+
+            for (let i = 20; i < scriptLogs.length; i++) {
+                await fs.unlink(path.join(RUNS_LOGS_PATH, scriptLogs[i]));
+            }
+        }
+    } catch (error) {
+        console.error('Error writing to run log file:', error);
+    }
+}
+
+async function executePythonScript(content: string) {
+  try {
+    const escapedContent = content.replace(/"/g, '\\"');
+    const { stdout, stderr } = await execAsync(`${process.env.PYTHON_PATH || 'python3'} -c "${escapedContent}"`);
+    if (stderr) {
+      console.error('Python script error:', stderr);
+      return stderr;
+    }
+    return stdout;
+  } catch (error: any) {
+    console.error('Error executing Python script:', error);
+    return error.message;
+  }
+}
+
+async function executeBashScript(content: string) {
+  try {
+    const escapedContent = content.replace(/"/g, '\\"');
+    const { stdout, stderr } = await execAsync(`bash -c "${escapedContent}"`);
+    if (stderr) {
+      console.error('Bash script error:', stderr);
+      return stderr;
+    }
+    return stdout;
+  } catch (error: any) {
+    console.error('Error executing Bash script:', error);
+    return error.message;
+  }
+}
+
+async function getSettingsFromAPI(): Promise<Settings> {
+  const response = await fetch(`${API_BASE_URL}/api/settings`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch settings');
+  }
+  return response.json();
 }
 

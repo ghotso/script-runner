@@ -94,6 +94,7 @@ ENV SCRIPTS_PATH="/data/scripts.json"
 ENV PYTHON_PATH="/usr/bin/python3"
 ENV LOGS_PATH="/data/logs"
 ENV RUNS_LOGS_PATH="/data/logs/runs"
+ENV PIP_USER=false
 
 # Expose port
 EXPOSE 3000
