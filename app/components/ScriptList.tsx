@@ -4,8 +4,9 @@ import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { Search, Tag, FileCode, Terminal, CheckCircle, XCircle } from 'lucide-react'
 import { Input } from './ui/input'
-import Select, { MultiValue } from 'react-select'
-import { toast } from 'react-toastify'
+import Select from 'react-select'
+import { toast, ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 type TagOption = { value: string; label: string };
 type Script = {
@@ -153,6 +154,7 @@ export default function ScriptList() {
           </Link>
         ))}
       </div>
+      <ToastContainer position="bottom-right" theme="dark" />
     </div>
   )
 }
