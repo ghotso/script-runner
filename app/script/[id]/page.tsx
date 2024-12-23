@@ -8,12 +8,21 @@ import DeleteScriptButton from './delete-script-button';
 import { getScript } from '@/lib/scripts';
 import SettingsCard from './settings-card';
 
-type PageProps = {
-  params: { id: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+type Params = {
+  id: string;
 };
 
-export default async function ScriptDetail({ params, searchParams }: PageProps) {
+type SearchParams = {
+  [key: string]: string | string[] | undefined;
+};
+
+export default async function ScriptDetail({
+  params,
+  searchParams,
+}: {
+  params: Params;
+  searchParams: SearchParams;
+}) {
   const script = await getScript(params.id);
 
   if (!script) {
