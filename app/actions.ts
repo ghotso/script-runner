@@ -189,19 +189,19 @@ async function writeToRunLogFile(scriptId: string, content: string) {
 }
 
 export async function runScript(scriptId: string) {
+    const scripts = await getScripts();
+    const script = scripts.find((s: Script) => s.id === scriptId);
+
+    if (!script) {
+        throw new Error('Script not found');
+    }
+
+    console.log(`Running script: ${script.name}`);
+    const startTime = new Date();
+    let status = 'Completed';
+    let output = '';
+
     try {
-        const scripts = await getScripts();
-        const script = scripts.find((s: Script) => s.id === scriptId);
-
-        if (!script) {
-            throw new Error('Script not found');
-        }
-
-        console.log(`Running script: ${script.name}`);
-        const startTime = new Date();
-        let status = 'Completed';
-        let output = '';
-
         if (script.type === 'python') {
             output = await executePythonScript(script.content);
         } else if (script.type === 'bash') {
@@ -244,9 +244,40 @@ ${output}
     } catch (error: any) {
         console.error('Error running script:', error);
         const errorOutput = error.message || 'An unknown error occurred';
+        status = 'Failed';
         
         // Send Discord notification for failed run
         await sendDiscordNotification(script, startTime, errorOutput);
+
+        const endTime = new Date();
+        const duration = endTime.getTime() - startTime.getTime();
+
+        const logContent = `
+Script ID: ${scriptId}
+Name: ${script.name}
+Type: ${script.type}
+Start Time: ${startTime.toISOString()}
+End Time: ${endTime.toISOString()}
+Duration: ${duration}ms
+Status: ${status}
+Error:
+${errorOutput}
+        `;
+
+        await writeToLogFile(logContent);
+        await writeToRunLogFile(scriptId, logContent);
+
+        const newLog: Log = {
+            timestamp: startTime.toISOString(),
+            status: status,
+            duration: duration,
+            output: errorOutput
+        };
+
+        script.logs.push(newLog);
+        script.logs = script.logs.slice(-12);
+
+        await saveScript(script);
 
         return { success: false, error: errorOutput };
     }
