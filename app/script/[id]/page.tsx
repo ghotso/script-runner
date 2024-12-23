@@ -1,23 +1,24 @@
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Save } from 'lucide-react';
 import ScriptEditor from './script-editor';
 import RequirementsEditor from './requirements-editor';
-import ScheduleManager from './schedule-manager';
 import LogViewer from './log-viewer';
 import ScriptRunner from './script-runner';
-import TagEditor from './tag-editor';
 import DeleteScriptButton from './delete-script-button';
 import { getScript } from '@/lib/scripts';
-import { Script } from '@/types/script';
 import SettingsCard from './settings-card';
 
-interface PageProps {
-  params: { id: string };
-}
+// Remove the PageProps interface
+// interface PageProps {
+//   params: { id: string };
+// }
 
-export default async function ScriptDetail({ params }: PageProps) {
+// Use the correct type for the params
+export default async function ScriptDetail({
+  params,
+}: {
+  params: { id: string }
+}) {
   const script = await getScript(params.id);
 
   if (!script) {
