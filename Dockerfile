@@ -21,6 +21,9 @@ RUN mkdir -p /data && echo '{"scripts":[]}' > /data/scripts.json
 # Set environment variable for build
 ENV SCRIPTS_PATH=/data/scripts.json
 
+# Run npm install before typecheck
+RUN npm install
+
 # Run TypeScript check
 RUN npm run typecheck
 
