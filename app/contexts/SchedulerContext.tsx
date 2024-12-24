@@ -5,10 +5,17 @@ import { showToast } from '../lib/toast'
 
 interface SchedulerContextType {
   isGlobalSchedulerEnabled: boolean
+  isLoading: boolean
   toggleGlobalScheduler: () => Promise<void>
 }
 
-const SchedulerContext = createContext<SchedulerContextType | undefined>(undefined)
+const defaultContextValue: SchedulerContextType = {
+  isGlobalSchedulerEnabled: false,
+  isLoading: true,
+  toggleGlobalScheduler: async () => {},
+}
+
+const SchedulerContext = createContext<SchedulerContextType>(defaultContextValue)
 
 export const useScheduler = () => {
   const context = useContext(SchedulerContext)
@@ -19,7 +26,8 @@ export const useScheduler = () => {
 }
 
 export const SchedulerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isGlobalSchedulerEnabled, setIsGlobalSchedulerEnabled] = useState(true)
+  const [isGlobalSchedulerEnabled, setIsGlobalSchedulerEnabled] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchSchedulerState = async () => {
@@ -31,6 +39,8 @@ export const SchedulerProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         }
       } catch (error) {
         console.error('Failed to fetch scheduler state:', error)
+      } finally {
+        setIsLoading(false)
       }
     }
 
@@ -38,6 +48,9 @@ export const SchedulerProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, [])
 
   const toggleGlobalScheduler = async () => {
+    if (isLoading) return
+
+    setIsLoading(true)
     try {
       const response = await fetch('/api/scheduler', {
         method: 'POST',
@@ -54,11 +67,13 @@ export const SchedulerProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     } catch (error) {
       console.error('Error toggling global scheduler:', error)
       showToast.error('Failed to update scheduler state')
+    } finally {
+      setIsLoading(false)
     }
   }
 
   return (
-    <SchedulerContext.Provider value={{ isGlobalSchedulerEnabled, toggleGlobalScheduler }}>
+    <SchedulerContext.Provider value={{ isGlobalSchedulerEnabled, isLoading, toggleGlobalScheduler }}>
       {children}
     </SchedulerContext.Provider>
   )

@@ -3,22 +3,9 @@
 import ScriptList from './components/ScriptList'
 import { Button } from './components/ui/button'
 import Link from 'next/link'
-import { Plus, FileCode, Power } from 'lucide-react'
-import { useScheduler } from './contexts/SchedulerContext'
-import { showToast } from './lib/toast'
+import { Plus, FileCode } from 'lucide-react'
 
 export default function Home() {
-  const { isGlobalSchedulerEnabled, toggleGlobalScheduler } = useScheduler()
-
-  const handleToggleGlobalScheduler = async () => {
-    try {
-      await toggleGlobalScheduler()
-      showToast.success(`Global scheduler ${isGlobalSchedulerEnabled ? 'disabled' : 'enabled'} successfully`)
-    } catch (error) {
-      showToast.error('Failed to toggle global scheduler')
-    }
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -27,14 +14,6 @@ export default function Home() {
           Scripts
         </h1>
         <div className="flex gap-2">
-          <Button
-            onClick={handleToggleGlobalScheduler}
-            variant={isGlobalSchedulerEnabled ? "default" : "destructive"}
-            className="flex items-center gap-2"
-          >
-            <Power className="h-4 w-4" />
-            {isGlobalSchedulerEnabled ? 'Disable' : 'Enable'} Scheduler
-          </Button>
           <Link href="/add-script">
             <Button className="bg-primary/20 text-primary hover:bg-primary/30">
               <Plus className="mr-2 h-4 w-4" /> Add New Script

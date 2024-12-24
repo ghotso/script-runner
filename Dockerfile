@@ -21,8 +21,8 @@ RUN npm run build
 # Stage 2: Production image
 FROM node:18-alpine
 
-# Install Python 3, pip, bash, and other necessary tools
-RUN apk add --no-cache python3 py3-pip bash curl
+# Install Python 3, pip, bash, jq, and other necessary tools
+RUN apk add --no-cache python3 py3-pip bash curl jq
 
 # Create app directory
 WORKDIR /app
