@@ -52,6 +52,15 @@ export function scheduleScript(script: Script, schedule: string) {
   console.log(`Scheduled script ${script.name} (ID: ${script.id}) with schedule: ${schedule}`)
 }
 
+export function removeSchedule(scriptId: string, schedule: string) {
+  const jobKey = `${scriptId}_${schedule}`
+  if (scheduledJobs[jobKey]) {
+    scheduledJobs[jobKey].stop()
+    delete scheduledJobs[jobKey]
+    console.log(`Removed schedule for script ${scriptId}: ${schedule}`)
+  }
+}
+
 async function executeScript(script: Script) {
   const scriptPath = path.join(scriptsDir, `${script.id}.${script.type.toLowerCase()}`)
   await fs.writeFile(scriptPath, script.code)
