@@ -19,19 +19,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-      </head>
       <body className={`${inter.className} bg-background text-foreground min-h-screen flex`}>
         <SchedulerProvider>
-          <Sidebar />
-          <main className="flex-grow ml-16 p-4 sm:p-6 md:p-8">
-            <div className="glassmorphism p-4 sm:p-6 min-h-screen">
-              {children}
-            </div>
-          </main>
-          <ToastProvider />
+          <>
+            <Sidebar />
+            <main className="flex-grow ml-16 p-4 sm:p-6 md:p-8">
+              <div className="glassmorphism p-4 sm:p-6 min-h-screen">
+                {children}
+              </div>
+            </main>
+            <ToastProvider />
+          </>
         </SchedulerProvider>
       </body>
     </html>

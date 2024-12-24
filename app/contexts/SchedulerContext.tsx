@@ -9,15 +9,13 @@ interface SchedulerContextType {
   toggleGlobalScheduler: () => Promise<void>
 }
 
-const defaultContextValue: SchedulerContextType = {
+const SchedulerContext = createContext<SchedulerContextType>({
   isGlobalSchedulerEnabled: false,
   isLoading: true,
   toggleGlobalScheduler: async () => {},
-}
+})
 
-const SchedulerContext = createContext<SchedulerContextType>(defaultContextValue)
-
-export const useScheduler = () => {
+export function useScheduler() {
   const context = useContext(SchedulerContext)
   if (!context) {
     throw new Error('useScheduler must be used within a SchedulerProvider')
@@ -25,7 +23,11 @@ export const useScheduler = () => {
   return context
 }
 
-export const SchedulerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export function SchedulerProvider({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   const [isGlobalSchedulerEnabled, setIsGlobalSchedulerEnabled] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -72,8 +74,14 @@ export const SchedulerProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }
 
+  const value = {
+    isGlobalSchedulerEnabled,
+    isLoading,
+    toggleGlobalScheduler,
+  }
+
   return (
-    <SchedulerContext.Provider value={{ isGlobalSchedulerEnabled, isLoading, toggleGlobalScheduler }}>
+    <SchedulerContext.Provider value={value}>
       {children}
     </SchedulerContext.Provider>
   )
