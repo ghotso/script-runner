@@ -35,7 +35,7 @@ fi
 
 # Initialize the scheduler
 echo "Initializing scheduler..."
-node -e "require('/app/utils/scheduler').default.initializeScheduler()"
+node -e "const scheduler = require('/app/utils/scheduler').default; scheduler.initializeScheduler();"
 
 # Check if Discord webhook is set
 if [ -z "$DISCORD_WEBHOOK_URL" ]; then

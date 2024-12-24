@@ -176,7 +176,7 @@ export async function updateScriptSchedulerState(scriptId: string, isEnabled: bo
   }
 }
 
-// Ensure the module is properly exported
+// Export all functions
 export default {
   initializeScheduler,
   scheduleScript,
