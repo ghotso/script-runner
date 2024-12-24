@@ -61,7 +61,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
       stdout = result.stdout
       stderr = result.stderr
     } catch (error) {
-      const execError = error as ExecException
+      const execError = error as ExecException & { stdout?: string; stderr?: string }
       stdout = execError.stdout || ''
       stderr = execError.stderr || execError.message
       exitCode = execError.code || 1

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import cron from 'node-cron'
 import fs from 'fs/promises'
 import path from 'path'
-import { exec } from 'child_process'
+import { exec, ExecException } from 'child_process'
 import util from 'util'
 
 const execPromise = util.promisify(exec)
@@ -10,6 +10,11 @@ const dataFile = path.join(process.cwd(), 'data', 'scripts.json')
 const logsDir = path.join(process.cwd(), 'data', 'logs')
 
 const scheduledJobs: { [key: string]: cron.ScheduledTask } = {}
+
+interface ExecResult {
+  stdout: string;
+  stderr: string;
+}
 
 export async function POST(request: Request) {
   try {
@@ -43,14 +48,28 @@ export async function POST(request: Request) {
       }
 
       try {
+        let stdout = ''
+        let stderr = ''
+        let exitCode = 0
+
+        try {
+          const result: ExecResult = await execPromise(command)
+          stdout = result.stdout
+          stderr = result.stderr
+        } catch (error) {
+          const execError = error as ExecException & { stdout?: string; stderr?: string }
+          stdout = execError.stdout || ''
+          stderr = execError.stderr || execError.message
+          exitCode = execError.code || 1
+        }
+
         const startTime = Date.now()
-        const { stdout, stderr } = await execPromise(command)
         const endTime = Date.now()
         const runtime = endTime - startTime
 
         const execution = {
           id: Date.now().toString(),
-          status: stderr ? 'failed' : 'success',
+          status: exitCode === 0 ? 'success' : 'failed',
           timestamp: new Date().toISOString(),
           log: stdout || stderr,
           runtime,
