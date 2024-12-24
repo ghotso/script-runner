@@ -141,7 +141,7 @@ export async function updateSchedulerState(isEnabled: boolean) {
     await initializeScheduler()
   } else {
     Object.values(scheduledJobs).forEach(job => job.stop())
-    scheduledJobs = {}
+    Object.keys(scheduledJobs).forEach(key => delete scheduledJobs[key])
   }
 }
 
