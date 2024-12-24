@@ -45,9 +45,6 @@ COPY --from=builder /app/lib ./lib
 COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/data ./data
 
-# Explicitly copy the favicon
-COPY --from=builder /app/public/favicon.ico ./public/favicon.ico
-
 # Set up Python virtual environment
 ENV VIRTUAL_ENV=/app/venv
 RUN python3 -m venv $VIRTUAL_ENV
@@ -56,9 +53,13 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 # Give necessary permissions
 RUN chmod -R 777 /app
 
+# Copy the startup script
+COPY startup.sh /app/startup.sh
+RUN chmod +x /app/startup.sh
+
 # Expose the port
 EXPOSE 3000
 
-# Start the application and redirect logs
-CMD ["sh", "-c", "npm start > /app/data/logs/container.log 2>&1"]
+# Start the application using the startup script
+CMD ["/app/startup.sh"]
 

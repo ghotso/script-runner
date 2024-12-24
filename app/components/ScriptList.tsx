@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Search, Tag, FileCode, Terminal, CheckCircle, XCircle, Clock } from 'lucide-react'
 import { Input } from './ui/input'
 import Select from 'react-select'
-import { toast } from 'react-toastify'
+import { showToast } from '../lib/toast'
 import { translateCronSchedule } from '../utils/cron'
 
 type TagOption = { value: string; label: string };
@@ -43,7 +43,7 @@ export default function ScriptList() {
         setScripts(data)
       } catch (error) {
         console.error('Error fetching scripts:', error)
-        toast.error('Failed to load scripts')
+        showToast.error('Failed to load scripts')
       }
     }
 
@@ -138,7 +138,7 @@ export default function ScriptList() {
                 )}
                 <h3 className="text-xl font-semibold text-primary">{script.name}</h3>
               </div>
-              <p className="text-muted-foreground mb-2">{script.type}</p>
+              <p className="text-white mb-2">{script.type}</p>
               <div className="flex flex-wrap gap-2 mb-2">
                 {script.tags.map(tag => (
                   <span 
@@ -151,7 +151,7 @@ export default function ScriptList() {
                   </span>
                 ))}
               </div>
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm text-white">
                 <h4 className="font-semibold mb-1 flex items-center">
                   <Clock className="mr-1" size={14} />
                   Schedules:

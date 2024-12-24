@@ -6,30 +6,11 @@ import CodeEditor from '../../components/CodeEditor'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
-import { Play, Trash2, Clock, Save, Plus, Download, CheckCircle, XCircle, Loader, X, Timer, FileCode, Terminal, Tag, AlarmClock } from 'lucide-react'
-import { toast } from 'react-toastify'
+import { Play, Trash2, Clock, Save, Plus, Download, CheckCircle, XCircle, Loader, X, Timer, FileCode, Terminal, Tag, AlarmClock, Power } from 'lucide-react'
+import { showToast } from '../../lib/toast'
 import { translateCronSchedule } from '../../utils/cron'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../components/ui/tooltip'
-
-type Execution = {
-  id: string;
-  status: 'success' | 'failed';
-  timestamp: string;
-  log: string;
-  runtime?: number;
-  triggeredBySchedule?: boolean;
-};
-
-type Script = {
-  id: string;
-  name: string;
-  type: string;
-  tags: string[];
-  code: string;
-  dependencies: string;
-  schedules: string[];
-  executions: Execution[];
-};
+import { Script } from '../../types/script'
 
 export default function ScriptDetails({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -51,7 +32,7 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
         setScript(data)
       } catch (error) {
         console.error('Error fetching script:', error)
-        toast.error('Failed to load script')
+        showToast.error('Failed to load script')
       }
     }
 
@@ -77,10 +58,10 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
         }
       })
 
-      toast.success(data.message || 'Script executed successfully!')
+      showToast.success(data.message || 'Script executed successfully!')
     } catch (error) {
       console.error('Error running script:', error)
-      toast.error(error instanceof Error ? error.message : 'Failed to execute script')
+      showToast.error(error instanceof Error ? error.message : 'Failed to execute script')
     } finally {
       setIsRunning(false)
     }
@@ -93,11 +74,11 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
       if (!response.ok) {
         throw new Error('Failed to delete script')
       }
-      toast.success('Script deleted successfully!')
+      showToast.success('Script deleted successfully!')
       router.push('/')
     } catch (error) {
       console.error('Error deleting script:', error)
-      toast.error('Failed to delete script')
+      showToast.error('Failed to delete script')
     }
   }
 
@@ -112,14 +93,14 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
       if (!response.ok) {
         throw new Error('Failed to save script')
       }
-      toast.success('Script saved successfully!')
+      showToast.success('Script saved successfully!')
     } catch (error) {
       console.error('Error saving script:', error)
-      toast.error('Failed to save script')
+      showToast.error('Failed to save script')
     }
   }
 
-  const handleChange = (field: keyof Script, value: string) => {
+  const handleChange = (field: keyof Script, value: string | boolean) => {
     setScript(prev => {
       if (!prev) return null
       return { ...prev, [field]: value }
@@ -129,19 +110,38 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
   const handleAddTag = async () => {
     if (!script || !newTag || script.tags.includes(newTag)) return
     const updatedTags = [...script.tags, newTag]
-    setScript(prev => prev ? { ...prev, tags: updatedTags } : null)
-    setNewTag('')
-    await saveChanges({ tags: updatedTags })
-    toast.success(`Tag "${newTag}" added successfully!`)
+    try {
+      await saveChanges({ tags: updatedTags })
+      setScript(prev => prev ? { ...prev, tags: updatedTags } : null)
+      setNewTag('')
+      showToast.success(`Tag "${newTag}" added successfully!`)
+    } catch (error) {
+      showToast.error('Failed to add tag')
+    }
   }
 
   const handleAddSchedule = async () => {
     if (!script || !newSchedule || script.schedules.includes(newSchedule)) return
     const updatedSchedules = [...script.schedules, newSchedule]
-    setScript(prev => prev ? { ...prev, schedules: updatedSchedules } : null)
-    setNewSchedule('')
-    await saveChanges({ schedules: updatedSchedules })
-    toast.success(`Schedule "${newSchedule}" added successfully!`)
+    try {
+      await saveChanges({ schedules: updatedSchedules })
+      setScript(prev => prev ? { ...prev, schedules: updatedSchedules } : null)
+      setNewSchedule('')
+      
+      // Update the scheduler
+      const response = await fetch('/api/schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scriptId: script.id, schedule: newSchedule })
+      })
+      if (!response.ok) {
+        throw new Error('Failed to update scheduler')
+      }
+      showToast.success(`Schedule "${newSchedule}" added successfully!`)
+    } catch (error) {
+      console.error('Error updating scheduler:', error)
+      showToast.error('Failed to update scheduler')
+    }
   }
 
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>, action: 'tag' | 'schedule') => {
@@ -166,10 +166,10 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
         throw new Error(data.error || 'Failed to install dependencies')
       }
 
-      toast.success(data.message || 'Dependencies installed successfully!')
+      showToast.success(data.message || 'Dependencies installed successfully!')
     } catch (error) {
       console.error('Error installing dependencies:', error)
-      toast.error(error instanceof Error ? error.message : 'Failed to install dependencies')
+      showToast.error(error instanceof Error ? error.message : 'Failed to install dependencies')
     } finally {
       setIsInstallingDependencies(false)
     }
@@ -178,17 +178,36 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
   const handleDeleteTag = async (tagToDelete: string) => {
     if (!script) return
     const updatedTags = script.tags.filter(tag => tag !== tagToDelete)
-    setScript(prev => prev ? { ...prev, tags: updatedTags } : null)
-    await saveChanges({ tags: updatedTags })
-    toast.success(`Tag "${tagToDelete}" removed`)
+    try {
+      await saveChanges({ tags: updatedTags })
+      setScript(prev => prev ? { ...prev, tags: updatedTags } : null)
+      showToast.success(`Tag "${tagToDelete}" removed`)
+    } catch (error) {
+      showToast.error('Failed to remove tag')
+    }
   }
 
-  const handleDeleteSchedule = async (scheduleToDelete: string) => {
+  const handleDeleteSchedule = async(scheduleToDelete: string) => {
     if (!script) return
     const updatedSchedules = script.schedules.filter(schedule => schedule !== scheduleToDelete)
-    setScript(prev => prev ? { ...prev, schedules: updatedSchedules } : null)
-    await saveChanges({ schedules: updatedSchedules })
-    toast.success(`Schedule removed`)
+    try {
+      await saveChanges({ schedules: updatedSchedules })
+      setScript(prev => prev ? { ...prev, schedules: updatedSchedules } : null)
+      
+      // Update the scheduler
+      const response = await fetch('/api/schedule', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scriptId: script.id, schedule: scheduleToDelete })
+      })
+      if (!response.ok) {
+        throw new Error('Failed to update scheduler')
+      }
+      showToast.success(`Schedule removed`)
+    } catch (error) {
+      console.error('Error updating scheduler:', error)
+      showToast.error('Failed to update scheduler')
+    }
   }
 
   const saveChanges = async (changes: Partial<Script>) => {
@@ -203,7 +222,19 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
       }
     } catch (error) {
       console.error('Error saving changes:', error)
-      toast.error('Failed to save changes')
+      throw error
+    }
+  }
+
+  const toggleScriptScheduler = async () => {
+    if (!script) return
+    try {
+      const updatedScript = { ...script, isSchedulerEnabled: !script.isSchedulerEnabled }
+      await saveChanges(updatedScript)
+      setScript(updatedScript)
+      showToast.success(`Script scheduler ${updatedScript.isSchedulerEnabled ? 'enabled' : 'disabled'}`)
+    } catch (error) {
+      showToast.error('Failed to update script scheduler state')
     }
   }
 
@@ -248,6 +279,14 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
                 Install Dependencies
               </>
             )}
+          </Button>
+          <Button
+            onClick={toggleScriptScheduler}
+            variant={script.isSchedulerEnabled ? "default" : "destructive"}
+            className="flex items-center gap-2"
+          >
+            <Power className="h-4 w-4" />
+            {script.isSchedulerEnabled ? 'Disable' : 'Enable'} Scheduler
           </Button>
           <Button variant="destructive" onClick={handleDelete}>
             <Trash2 className="mr-2 h-4 w-4" />
@@ -303,7 +342,6 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
                 <thead className="border-b bg-muted/50">
                   <tr>
                     <th className="h-10 px-2 text-left align-middle font-medium text-muted-foreground">Schedule</th>
-                    <th className="h-10 px-2 text-left align-middle font-medium text-muted-foreground">Next Run</th>
                     <th className="h-10 w-[50px]"></th>
                   </tr>
                 </thead>
@@ -313,11 +351,8 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
                       <td className="p-2 align-middle">
                         <div className="flex items-center gap-2">
                           <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span>{schedule}</span>
+                          <span>{schedule} | {translateCronSchedule(schedule)}</span>
                         </div>
-                      </td>
-                      <td className="p-2 align-middle text-sm text-muted-foreground">
-                        {translateCronSchedule(schedule)}
                       </td>
                       <td className="p-2 align-middle">
                         <Button
@@ -333,7 +368,7 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
                   ))}
                   {script.schedules.length === 0 && (
                     <tr>
-                      <td colSpan={3} className="p-2 text-center text-sm text-muted-foreground">
+                      <td colSpan={2} className="p-2 text-center text-sm text-muted-foreground">
                         No schedules configured
                       </td>
                     </tr>
@@ -424,9 +459,9 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
         </div>
       </div>
       {selectedExecution && (
-        <div className="fixed inset-x-0 top-0 z-50 flex justify-center">
-          <div className="w-full max-w-4xl m-4">
-            <div className="glassmorphism p-6 relative">
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-start pt-8 z-50">
+          <div className="w-full max-w-4xl mx-4">
+            <div id="execution-modal" className="glassmorphism p-6 relative">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-semibold">Execution Log</h3>
                 <div className="flex items-center gap-4">
@@ -449,7 +484,9 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
                 </div>
               </div>
               <div className="bg-black/50 rounded-lg p-4 max-h-[60vh] overflow-auto">
-                <pre className="whitespace-pre-wrap font-mono text-sm">{selectedExecution.log}</pre>
+                <pre className="whitespace-pre-wrap font-mono text-sm">
+                  {selectedExecution.log.replace('Errors/Warnings:', 'Script Log Output:')}
+                </pre>
               </div>
             </div>
           </div>

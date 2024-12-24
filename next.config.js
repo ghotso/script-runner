@@ -10,6 +10,10 @@ const nextConfig = {
   },
   // Explicitly set the asset prefix to ensure correct paths in production
   assetPrefix: process.env.NODE_ENV === 'production' ? '/' : '',
+  // Add this to ensure static files are served correctly
+  images: {
+    unoptimized: true,
+  },
 }
 
 module.exports = nextConfig

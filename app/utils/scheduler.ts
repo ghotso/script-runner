@@ -66,14 +66,17 @@ async function executeScript(script: Script) {
     return
   }
 
+  const startTime = Date.now()
   try {
     const { stdout, stderr } = await execPromise(command)
+    const endTime = Date.now()
+    const runtime = endTime - startTime
     const execution = {
       id: Date.now().toString(),
       status: 'success',
       timestamp: new Date().toISOString(),
       log: stdout + (stderr ? '\nErrors/Warnings:\n' + stderr : ''),
-      runtime: 0, // You may want to calculate the actual runtime
+      runtime,
       triggeredBySchedule: true
     }
 
@@ -89,9 +92,9 @@ async function executeScript(script: Script) {
     // Log to file
     const logFileName = `${script.id}_${execution.timestamp.replace(/:/g, '-')}.log`
     const logFile = path.join(logsDir, logFileName)
-    await fs.writeFile(logFile, `${execution.timestamp} - ${execution.status}\n${execution.log}\n`)
+    await fs.writeFile(logFile, `${execution.timestamp} - ${execution.status}\nRuntime: ${runtime}ms\n${execution.log}\n`)
 
-    console.log(`Scheduled script execution completed: ${script.name} (ID: ${script.id})`)
+    console.log(`Scheduled script execution completed: ${script.name} (ID: ${script.id}), Runtime: ${runtime}ms`)
   } catch (error) {
     console.error(`Error executing scheduled script ${script.name} (ID: ${script.id}):`, error)
   } finally {

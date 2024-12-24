@@ -34,8 +34,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
           console.log(`${dep} is already installed`)
         } catch {
           try {
-            // Use apk instead of apt-get for Alpine Linux
-            await execPromise(`apk add ${dep}`)
+            await execPromise(`apk add --no-cache ${dep}`)
             installedDependencies.push(dep)
           } catch (error) {
             console.error(`Failed to install ${dep}:`, error)

@@ -6,9 +6,8 @@ import CodeEditor from '../components/CodeEditor'
 import { Input } from '../components/ui/input'
 import { Button } from '../components/ui/button'
 import { Label } from '../components/ui/label'
-import { Slide, ToastContainer, toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
 import { Plus, Clock, Tag, X, FileCode, Terminal, Save } from 'lucide-react'
+import { showToast } from '../lib/toast'
 
 export default function AddScript() {
   const router = useRouter()
@@ -36,11 +35,11 @@ export default function AddScript() {
         throw new Error('Failed to create script')
       }
 
-      toast.success('Script created successfully!', { transition: Slide })
+      showToast.success('Script created successfully!')
       router.push('/')
     } catch (error) {
       console.error('Error creating script:', error)
-      toast.error('Failed to create script', { transition: Slide })
+      showToast.error('Failed to create script')
     }
   }
 
@@ -48,7 +47,7 @@ export default function AddScript() {
     if (newTag && !tags.includes(newTag)) {
       setTags(prev => [...prev, newTag])
       setNewTag('')
-      toast.success(`Tag "${newTag}" added successfully!`, { transition: Slide })
+      showToast.success(`Tag "${newTag}" added successfully!`)
     }
   }
 
@@ -56,7 +55,7 @@ export default function AddScript() {
     if (newSchedule && !schedules.includes(newSchedule)) {
       setSchedules(prev => [...prev, newSchedule])
       setNewSchedule('')
-      toast.success(`Schedule "${newSchedule}" added successfully!`, { transition: Slide })
+      showToast.success(`Schedule "${newSchedule}" added successfully!`)
     }
   }
 
@@ -73,12 +72,12 @@ export default function AddScript() {
 
   const handleDeleteTag = (tagToDelete: string) => {
     setTags(prev => prev.filter(tag => tag !== tagToDelete))
-    toast.success(`Tag "${tagToDelete}" removed`, { transition: Slide })
+    showToast.success(`Tag "${tagToDelete}" removed`)
   }
 
   const handleDeleteSchedule = (scheduleToDelete: string) => {
     setSchedules(prev => prev.filter(schedule => schedule !== scheduleToDelete))
-    toast.success(`Schedule removed`, { transition: Slide })
+    showToast.success(`Schedule removed`)
   }
 
   return (
@@ -215,18 +214,6 @@ export default function AddScript() {
           Save Script
         </Button>
       </form>
-      <ToastContainer
-        position="bottom-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-      />
     </div>
   )
 }
