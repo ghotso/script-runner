@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Input } from '../components/ui/input'
 import { Button } from '../components/ui/button'
 import { Label } from '../components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Bell, Webhook } from 'lucide-react'
-import { Switch } from '@/components/ui/switch'
+import { Switch } from '../components/ui/switch'
+import { showToast } from '../lib/toast'
 
 export default function Settings() {
   const [discordWebhook, setDiscordWebhook] = useState('')
@@ -16,10 +17,43 @@ export default function Settings() {
     onScheduled: false
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch('/api/settings')
+        if (response.ok) {
+          const data = await response.json()
+          setDiscordWebhook(data.discordWebhook || '')
+        }
+      } catch (error) {
+        console.error('Failed to fetch settings:', error)
+        showToast.error('Failed to load settings')
+      }
+    }
+
+    fetchSettings()
+  }, [])
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implement settings update logic
-    console.log({ discordWebhook, notifications })
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ discordWebhook }),
+      })
+
+      if (response.ok) {
+        showToast.success('Settings updated successfully')
+      } else {
+        throw new Error('Failed to update settings')
+      }
+    } catch (error) {
+      console.error('Error updating settings:', error)
+      showToast.error('Failed to update settings')
+    }
   }
 
   return (

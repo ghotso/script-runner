@@ -3,6 +3,7 @@ import { exec, ExecException } from 'child_process'
 import util from 'util'
 import fs from 'fs/promises'
 import path from 'path'
+import { sendDiscordNotification } from '../../../utils/discord'
 
 const execPromise = util.promisify(exec)
 const dataFile = path.join(process.cwd(), 'data', 'scripts.json')
@@ -91,6 +92,11 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
     console.log(`Script execution result:`, { stdout, stderr, exitCode, status: execution.status })
 
+    // Send Discord notification if the execution failed
+    if (!success) {
+      await sendDiscordNotification(`Script "${script.name}" (ID: ${script.id}) failed to execute.\nError: ${stderr}`)
+    }
+
     return NextResponse.json({ 
       message: success ? 'Script executed successfully' : 'Script execution completed with non-zero exit code',
       execution,
@@ -112,7 +118,10 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
     // Log the error
     const errorLogFile = path.join(logsDir, 'error.log')
-    await fs.appendFile(errorLogFile, `${execution.timestamp} - Error executing script: ${JSON.stringify(execution)}\n\n`)
+    await fs.appendFile(errorLogFile, `${execution.timestamp} - Error executing script: ${JSON.stringify(execution)}\n`)
+
+    // Send Discord notification for the error
+    await sendDiscordNotification(`Error executing script (ID: ${params.id}).\nError: ${execution.log}`)
 
     return NextResponse.json({ 
       error: 'Failed to run script',
