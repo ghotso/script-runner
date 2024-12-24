@@ -4,6 +4,11 @@ export function translateCronSchedule(schedule: string): string {
 
   const [minute, hour, dayOfMonth, month, dayOfWeek] = parts
 
+  // Every minute
+  if (minute === '*' && hour === '*' && dayOfMonth === '*' && month === '*' && dayOfWeek === '*') {
+    return 'Every minute'
+  }
+
   // Every x minutes
   if (minute.startsWith('*/')) {
     const interval = parseInt(minute.substring(2))

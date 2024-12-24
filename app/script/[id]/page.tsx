@@ -6,7 +6,7 @@ import CodeEditor from '../../components/CodeEditor'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
-import { Play, Trash2, Clock, Save, Plus, Download, CheckCircle, XCircle, Loader, X, Timer, FileCode, Terminal, Tag } from 'lucide-react'
+import { Play, Trash2, Clock, Save, Plus, Download, CheckCircle, XCircle, Loader, X, Timer, FileCode, Terminal, Tag, AlarmClock } from 'lucide-react'
 import { toast } from 'react-toastify'
 import { translateCronSchedule } from '../../utils/cron'
 
@@ -15,7 +15,8 @@ type Execution = {
   status: 'success' | 'failed';
   timestamp: string;
   log: string;
-  runtime?: number; // in milliseconds
+  runtime?: number;
+  triggeredBySchedule?: boolean;
 };
 
 type Script = {
@@ -304,8 +305,8 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
               <table className="w-full">
                 <thead className="border-b bg-muted/50">
                   <tr>
-                    <th className="h-10 px-2 text-left align-middle font-medium text-muted-foreground">Cron</th>
-                    <th className="h-10 px-2 text-left align-middle font-medium text-muted-foreground">Translation</th>
+                    <th className="h-10 px-2 text-left align-middle font-medium text-muted-foreground">Schedule</th>
+                    <th className="h-10 px-2 text-left align-middle font-medium text-muted-foreground">Next Run</th>
                     <th className="h-10 w-[50px]"></th>
                   </tr>
                 </thead>
@@ -406,6 +407,9 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Timer className="h-3 w-3" />
                     <span>{execution.runtime ? `${(execution.runtime / 1000).toFixed(1)}s` : 'N/A'}</span>
+                    {execution.triggeredBySchedule && (
+                      <AlarmClock className="h-3 w-3 ml-2" title="Triggered by schedule" />
+                    )}
                   </div>
                 </div>
               ))}

@@ -7,11 +7,15 @@ import util from 'util'
 
 const execPromise = util.promisify(exec)
 const dataFile = path.join(process.cwd(), 'data', 'scripts.json')
+const logsDir = path.join(process.cwd(), 'data', 'logs')
 
 const scheduledJobs: { [key: string]: cron.ScheduledTask } = {}
 
 export async function POST(request: Request) {
   try {
+    // Ensure logs directory exists with proper permissions
+    await fs.mkdir(logsDir, { recursive: true, mode: 0o755 })
+
     const { scriptId, schedule } = await request.json()
     const data = await fs.readFile(dataFile, 'utf-8')
     const scripts = JSON.parse(data)
@@ -49,11 +53,16 @@ export async function POST(request: Request) {
           status: stderr ? 'failed' : 'success',
           timestamp: new Date().toISOString(),
           log: stdout || stderr,
-          runtime
+          runtime,
+          triggeredBySchedule: true
         }
 
         script.executions = [execution, ...(script.executions || [])].slice(0, 10)
         await fs.writeFile(dataFile, JSON.stringify(scripts, null, 2))
+
+        // Log to file
+        const logFile = path.join(logsDir, `${script.id}.log`)
+        await fs.appendFile(logFile, `${new Date().toISOString()} - ${execution.status}\n${stdout || stderr}\n\n`)
 
         console.log(`Script ${script.id} executed:`, stdout)
         if (stderr) {
@@ -61,6 +70,9 @@ export async function POST(request: Request) {
         }
       } catch (error) {
         console.error(`Failed to execute script ${script.id}:`, error)
+        // Log the error
+        const logFile = path.join(logsDir, 'error.log')
+        await fs.appendFile(logFile, `${new Date().toISOString()} - Failed to execute script ${script.id}: ${error}\n\n`)
       } finally {
         await fs.unlink(scriptPath)
       }
@@ -71,6 +83,14 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ message: 'Schedule updated successfully' })
   } catch (error) {
+    console.error('Error updating schedule:', error)
+    // Log the error
+    try {
+      const logFile = path.join(logsDir, 'error.log')
+      await fs.appendFile(logFile, `${new Date().toISOString()} - Error updating schedule: ${error}\n\n`)
+    } catch (logError) {
+      console.error('Failed to write to error log:', logError)
+    }
     return NextResponse.json({ error: 'Failed to update schedule' }, { status: 500 })
   }
 }

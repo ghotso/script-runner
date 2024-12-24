@@ -13,7 +13,7 @@ RUN npm install
 COPY . .
 
 # Create scripts and data directories
-RUN mkdir -p scripts data
+RUN mkdir -p scripts data/logs
 
 # Build the application
 RUN npm run build
@@ -30,8 +30,8 @@ WORKDIR /app
 # Create scripts directory
 RUN mkdir -p /app/scripts
 
-# Create data directory
-RUN mkdir -p /app/data
+# Create data and logs directories with proper permissions
+RUN mkdir -p /app/data/logs && chmod 755 /app/data/logs
 
 # Copy built assets from builder
 COPY --from=builder /app/.next ./.next

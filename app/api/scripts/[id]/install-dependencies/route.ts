@@ -20,16 +20,32 @@ export async function POST(request: Request, { params }: { params: { id: string 
     const tempDir = path.join(process.cwd(), 'temp', script.id)
     await fs.mkdir(tempDir, { recursive: true })
 
-    const requirementsPath = path.join(tempDir, 'requirements.txt')
-    await fs.writeFile(requirementsPath, script.dependencies)
-
     let command
+    let installedDependencies = []
     if (script.type === 'Python') {
-      // Use the virtual environment's pip to install dependencies
+      const requirementsPath = path.join(tempDir, 'requirements.txt')
+      await fs.writeFile(requirementsPath, script.dependencies)
       command = `${process.env.VIRTUAL_ENV}/bin/pip install -r ${requirementsPath}`
     } else if (script.type === 'Bash') {
-      // For Bash scripts, we'll assume the dependencies are actually shell commands to install packages
-      command = script.dependencies
+      const dependencies = script.dependencies.split('\n').filter(dep => dep.trim() !== '')
+      for (const dep of dependencies) {
+        try {
+          await execPromise(`which ${dep}`)
+          console.log(`${dep} is already installed`)
+        } catch {
+          try {
+            await execPromise(`sudo apt-get update && sudo apt-get install -y ${dep}`)
+            installedDependencies.push(dep)
+          } catch (error) {
+            console.error(`Failed to install ${dep}:`, error)
+            return NextResponse.json({ 
+              error: `Failed to install ${dep}`, 
+              details: error instanceof Error ? error.message : String(error)
+            }, { status: 500 })
+          }
+        }
+      }
+      command = 'echo "Dependencies checked/installed"'
     } else {
       return NextResponse.json({ error: 'Unsupported script type' }, { status: 400 })
     }
@@ -47,19 +63,21 @@ export async function POST(request: Request, { params }: { params: { id: string 
       }, { status: 500 })
     }
 
-    const installedDependencies = stdout.split('\n').filter(line => line.includes('Successfully installed')).join('\n')
-
-    if (installedDependencies) {
-      return NextResponse.json({ 
-        message: 'Dependencies installed successfully!',
-        details: installedDependencies
-      })
+    let message
+    if (installedDependencies.length > 0) {
+      message = `Dependencies installed successfully: ${installedDependencies.join(', ')}`
+    } else if (script.type === 'Python') {
+      message = stdout.includes('Successfully installed') 
+        ? `Dependencies installed successfully: ${stdout.split('Successfully installed')[1].trim()}`
+        : 'All dependencies are already up to date.'
     } else {
-      return NextResponse.json({ 
-        message: 'No new dependencies were installed. All required packages are already up to date.',
-        details: stdout
-      })
+      message = 'All dependencies are already installed.'
     }
+
+    return NextResponse.json({ 
+      message,
+      details: stdout
+    })
   } catch (error) {
     console.error('Error installing dependencies:', error)
     return NextResponse.json({ 
