@@ -1,7 +1,6 @@
 import fs from 'fs/promises'
 import path from 'path'
 import { createWriteStream } from 'fs'
-import { format } from 'date-fns'
 
 const logsDir = path.join(process.cwd(), 'data', 'logs')
 const maxLogSize = 5 * 1024 * 1024 // 5 MB
