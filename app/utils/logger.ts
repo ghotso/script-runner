@@ -36,7 +36,7 @@ async function rotateLogIfNeeded(logFile: string) {
     }
   } catch (error) {
     // If the file doesn't exist, no need to rotate
-    if (error.code !== 'ENOENT') {
+    if (error instanceof Error && 'code' in error && error.code !== 'ENOENT') {
       console.error('Error rotating log file:', error)
     }
   }
