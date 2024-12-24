@@ -3,11 +3,13 @@ import fs from 'fs/promises'
 import path from 'path'
 import { exec } from 'child_process'
 import util from 'util'
+import { logInfo, logError } from './logger'
+import { sendDiscordNotification } from './discord'
 
 const execPromise = util.promisify(exec)
 const dataFile = path.join(process.cwd(), 'data', 'scripts.json')
 const scriptsDir = path.join(process.cwd(), 'scripts')
-const logsDir = path.join(process.cwd(), 'data', 'logs')
+const schedulerStateFile = path.join(process.cwd(), 'data', 'scheduler-state.json')
 
 interface Script {
   id: string;
@@ -16,18 +18,33 @@ interface Script {
   code: string;
   schedules: string[];
   executions: any[];
+  isSchedulerEnabled: boolean;
 }
 
 const scheduledJobs: { [key: string]: cron.ScheduledTask } = {}
+
+async function getGlobalSchedulerState(): Promise<boolean> {
+  try {
+    const data = await fs.readFile(schedulerStateFile, 'utf-8')
+    const state = JSON.parse(data)
+    return state.isEnabled
+  } catch (error) {
+    console.error('Error reading global scheduler state:', error)
+    return false
+  }
+}
 
 export async function initializeScheduler() {
   try {
     const data = await fs.readFile(dataFile, 'utf-8')
     const scripts: Script[] = JSON.parse(data)
+    const isGlobalSchedulerEnabled = await getGlobalSchedulerState()
 
     for (const script of scripts) {
-      for (const schedule of script.schedules) {
-        scheduleScript(script, schedule)
+      if (isGlobalSchedulerEnabled && script.isSchedulerEnabled) {
+        for (const schedule of script.schedules) {
+          scheduleScript(script, schedule)
+        }
       }
     }
 
@@ -94,20 +111,59 @@ async function executeScript(script: Script) {
     const scripts: Script[] = JSON.parse(data)
     const scriptIndex = scripts.findIndex(s => s.id === script.id)
     if (scriptIndex !== -1) {
-      scripts[scriptIndex].executions = [execution, ...scripts[scriptIndex].executions].slice(0, 10)
+      scripts[scriptIndex].executions = [execution, ...scripts[scriptIndex].executions].slice(0, 20)
       await fs.writeFile(dataFile, JSON.stringify(scripts, null, 2))
     }
 
-    // Log to file
-    const logFileName = `${script.id}_${execution.timestamp.replace(/:/g, '-')}.log`
-    const logFile = path.join(logsDir, logFileName)
-    await fs.writeFile(logFile, `${execution.timestamp} - ${execution.status}\nRuntime: ${runtime}ms\n${execution.log}\n`)
+    await logInfo(script.id, 'Scheduled script execution completed', {
+      runtime,
+      stdout,
+      stderr,
+    })
+
+    await sendDiscordNotification(`Scheduled script "${script.name}" (ID: ${script.id}) executed successfully.`, 'scheduled')
 
     console.log(`Scheduled script execution completed: ${script.name} (ID: ${script.id}), Runtime: ${runtime}ms`)
   } catch (error) {
+    await sendDiscordNotification(`Scheduled script "${script.name}" (ID: ${script.id}) failed to execute.\nError: ${error instanceof Error ? error.message : String(error)}`, 'scheduled')
+    await logError(script.id, 'Error executing scheduled script', {
+      error: error instanceof Error ? error.message : String(error),
+    })
     console.error(`Error executing scheduled script ${script.name} (ID: ${script.id}):`, error)
   } finally {
     await fs.unlink(scriptPath)
+  }
+}
+
+export async function updateSchedulerState(isEnabled: boolean) {
+  await fs.writeFile(schedulerStateFile, JSON.stringify({ isEnabled }), 'utf-8')
+  if (isEnabled) {
+    await initializeScheduler()
+  } else {
+    Object.values(scheduledJobs).forEach(job => job.stop())
+    scheduledJobs = {}
+  }
+}
+
+export async function updateScriptSchedulerState(scriptId: string, isEnabled: boolean) {
+  const data = await fs.readFile(dataFile, 'utf-8')
+  const scripts: Script[] = JSON.parse(data)
+  const scriptIndex = scripts.findIndex(s => s.id === scriptId)
+  
+  if (scriptIndex !== -1) {
+    scripts[scriptIndex].isSchedulerEnabled = isEnabled
+    await fs.writeFile(dataFile, JSON.stringify(scripts, null, 2))
+    
+    if (isEnabled) {
+      const isGlobalSchedulerEnabled = await getGlobalSchedulerState()
+      if (isGlobalSchedulerEnabled) {
+        for (const schedule of scripts[scriptIndex].schedules) {
+          scheduleScript(scripts[scriptIndex], schedule)
+        }
+      }
+    } else {
+      scripts[scriptIndex].schedules.forEach(schedule => removeSchedule(scriptId, schedule))
+    }
   }
 }
 

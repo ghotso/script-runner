@@ -4,11 +4,11 @@ import util from 'util'
 import fs from 'fs/promises'
 import path from 'path'
 import { sendDiscordNotification } from '../../../../utils/discord'
+import { logInfo, logError } from '../../../../utils/logger'
 
 const execPromise = util.promisify(exec)
 const dataFile = path.join(process.cwd(), 'data', 'scripts.json')
 const scriptsDir = path.join(process.cwd(), 'scripts')
-const logsDir = path.join(process.cwd(), 'data', 'logs')
 
 interface ExecResult {
   stdout: string;
@@ -23,8 +23,6 @@ export async function POST(request: Request, { params }: { params: { id: string 
   const startTime = Date.now()
   
   try {
-    await fs.mkdir(logsDir, { recursive: true, mode: 0o755 })
-
     const data = await fs.readFile(dataFile, 'utf-8')
     let scripts = JSON.parse(data)
     const scriptIndex = scripts.findIndex((s: any) => s.id === params.id)
@@ -78,17 +76,20 @@ export async function POST(request: Request, { params }: { params: { id: string 
       triggeredBySchedule: false
     }
 
-    scripts[scriptIndex].executions = [execution, ...(scripts[scriptIndex].executions || [])].slice(0, 10)
+    scripts[scriptIndex].executions = [execution, ...(scripts[scriptIndex].executions || [])].slice(0, 20)
     await fs.writeFile(dataFile, JSON.stringify(scripts, null, 2))
 
-    const logFileName = `${script.id}_${execution.timestamp.replace(/:/g, '-')}.log`
-    const logFile = path.join(logsDir, logFileName)
-    await fs.writeFile(logFile, `${execution.timestamp} - ${execution.status}\n${execution.log}\n`)
+    await logInfo(script.id, 'Script execution completed', {
+      status: execution.status,
+      runtime,
+      stdout,
+      stderr,
+    })
 
-    console.log(`Script execution result:`, { stdout, stderr, exitCode, status: execution.status })
-
-    if (!success) {
-      await sendDiscordNotification(`Script "${script.name}" (ID: ${script.id}) failed to execute.\nError: ${stderr}`)
+    if (success) {
+      await sendDiscordNotification(`Script "${script.name}" (ID: ${script.id}) executed successfully.`, 'success')
+    } else {
+      await sendDiscordNotification(`Script "${script.name}" (ID: ${script.id}) failed to execute.\nError: ${stderr}`, 'failure')
     }
 
     return NextResponse.json({ 
@@ -110,10 +111,12 @@ export async function POST(request: Request, { params }: { params: { id: string 
       triggeredBySchedule: false
     }
 
-    const errorLogFile = path.join(logsDir, 'error.log')
-    await fs.appendFile(errorLogFile, `${execution.timestamp} - Error executing script: ${JSON.stringify(execution)}\n`)
+    await logError(params.id, 'Error executing script', {
+      error: error instanceof Error ? error.message : String(error),
+      runtime,
+    })
 
-    await sendDiscordNotification(`Error executing script (ID: ${params.id}).\nError: ${execution.log}`)
+    await sendDiscordNotification(`Error executing script (ID: ${params.id}).\nError: ${execution.log}`, 'failure')
 
     return NextResponse.json({ 
       error: 'Failed to run script',

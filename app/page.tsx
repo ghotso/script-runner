@@ -5,9 +5,19 @@ import { Button } from './components/ui/button'
 import Link from 'next/link'
 import { Plus, FileCode, Power } from 'lucide-react'
 import { useScheduler } from './contexts/SchedulerContext'
+import { showToast } from './lib/toast'
 
 export default function Home() {
   const { isGlobalSchedulerEnabled, toggleGlobalScheduler } = useScheduler()
+
+  const handleToggleGlobalScheduler = async () => {
+    try {
+      await toggleGlobalScheduler()
+      showToast.success(`Global scheduler ${isGlobalSchedulerEnabled ? 'disabled' : 'enabled'} successfully`)
+    } catch (error) {
+      showToast.error('Failed to toggle global scheduler')
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -18,7 +28,7 @@ export default function Home() {
         </h1>
         <div className="flex gap-2">
           <Button
-            onClick={toggleGlobalScheduler}
+            onClick={handleToggleGlobalScheduler}
             variant={isGlobalSchedulerEnabled ? "default" : "destructive"}
             className="flex items-center gap-2"
           >

@@ -54,7 +54,7 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
         if (!prevScript) return null
         return {
           ...prevScript,
-          executions: [data.execution, ...prevScript.executions].slice(0, 10)
+          executions: [data.execution, ...prevScript.executions].slice(0, 20)
         }
       })
 

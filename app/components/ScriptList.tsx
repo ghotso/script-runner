@@ -41,6 +41,7 @@ export default function ScriptList() {
         }
         const data = await response.json()
         setScripts(data)
+        showToast.success('Scripts loaded successfully')
       } catch (error) {
         console.error('Error fetching scripts:', error)
         showToast.error('Failed to load scripts')

@@ -3,26 +3,52 @@ import path from 'path'
 
 const settingsFile = path.join(process.cwd(), 'data', 'settings.json')
 
-async function getDiscordWebhook() {
+interface Settings {
+  discordWebhook: string;
+  notifications: {
+    onSuccess: boolean;
+    onFailure: boolean;
+    onScheduled: boolean;
+  };
+}
+
+async function getSettings(): Promise<Settings> {
   try {
     const data = await fs.readFile(settingsFile, 'utf-8')
-    const settings = JSON.parse(data)
-    return settings.discordWebhook || null
+    return JSON.parse(data)
   } catch (error) {
-    console.error('Failed to read Discord webhook:', error)
-    return null
+    console.error('Failed to read settings:', error)
+    return {
+      discordWebhook: '',
+      notifications: {
+        onSuccess: true,
+        onFailure: true,
+        onScheduled: false
+      }
+    }
   }
 }
 
-export async function sendDiscordNotification(message: string) {
-  const webhookUrl = await getDiscordWebhook()
-  if (!webhookUrl) {
+export async function sendDiscordNotification(message: string, type: 'success' | 'failure' | 'scheduled') {
+  const settings = await getSettings()
+  
+  if (!settings.discordWebhook) {
     console.log('Discord webhook URL not set. Skipping notification.')
     return
   }
 
+  // Check if we should send this type of notification
+  if (
+    (type === 'success' && !settings.notifications.onSuccess) ||
+    (type === 'failure' && !settings.notifications.onFailure) ||
+    (type === 'scheduled' && !settings.notifications.onScheduled)
+  ) {
+    console.log(`Skipping ${type} notification as per user settings.`)
+    return
+  }
+
   try {
-    const response = await fetch(webhookUrl, {
+    const response = await fetch(settings.discordWebhook, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

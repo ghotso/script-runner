@@ -8,7 +8,14 @@ async function ensureSettingsFileExists() {
   try {
     await fs.access(settingsFile)
   } catch (error) {
-    await fs.writeFile(settingsFile, JSON.stringify({ discordWebhook: '' }), 'utf-8')
+    await fs.writeFile(settingsFile, JSON.stringify({
+      discordWebhook: '',
+      notifications: {
+        onSuccess: true,
+        onFailure: true,
+        onScheduled: false
+      }
+    }), 'utf-8')
   }
 }
 
@@ -26,9 +33,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { discordWebhook } = await request.json()
+    const { discordWebhook, notifications } = await request.json()
     await ensureSettingsFileExists()
-    await fs.writeFile(settingsFile, JSON.stringify({ discordWebhook }), 'utf-8')
+    await fs.writeFile(settingsFile, JSON.stringify({ discordWebhook, notifications }), 'utf-8')
     return NextResponse.json({ message: 'Settings updated successfully' })
   } catch (error) {
     console.error('Failed to update settings:', error)
