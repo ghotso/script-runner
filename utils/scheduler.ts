@@ -18,48 +18,52 @@ interface Script {
   code: string;
   schedules: string[];
   executions: any[];
-  isSchedulerEnabled: boolean;
+}
+
+interface SchedulerState {
+  globalEnabled: boolean;
+  scriptStates: { [scriptId: string]: boolean };
 }
 
 const scheduledJobs: { [key: string]: cron.ScheduledTask } = {}
 
-async function getGlobalSchedulerState(): Promise<boolean> {
+async function getSchedulerState(): Promise<SchedulerState> {
   try {
     const data = await fs.readFile(schedulerStateFile, 'utf-8')
-    const state = JSON.parse(data)
-    return state.isEnabled
+    return JSON.parse(data)
   } catch (error) {
-    console.error('Error reading global scheduler state:', error)
-    return false
+    console.error('Error reading scheduler state:', error)
+    return { globalEnabled: false, scriptStates: {} }
   }
+}
+
+async function saveSchedulerState(state: SchedulerState): Promise<void> {
+  await fs.writeFile(schedulerStateFile, JSON.stringify(state, null, 2), 'utf-8')
 }
 
 export async function initializeScheduler(): Promise<void> {
   try {
     console.log('Initializing scheduler...')
-    const data = await fs.readFile(dataFile, 'utf-8')
-    const scripts: Script[] = JSON.parse(data)
-    const isGlobalSchedulerEnabled = await getGlobalSchedulerState()
+    const scriptsData = await fs.readFile(dataFile, 'utf-8')
+    const scripts: Script[] = JSON.parse(scriptsData)
+    const schedulerState = await getSchedulerState()
 
-    console.log(`Global scheduler state: ${isGlobalSchedulerEnabled ? 'Enabled' : 'Disabled'}`)
+    console.log(`Global scheduler state: ${schedulerState.globalEnabled ? 'Enabled' : 'Disabled'}`)
     console.log(`Found ${scripts.length} scripts`)
 
     // Stop all existing jobs
     Object.values(scheduledJobs).forEach(job => job.stop())
     Object.keys(scheduledJobs).forEach(key => delete scheduledJobs[key])
 
-    if (isGlobalSchedulerEnabled) {
-      for (const script of scripts) {
-        if (script.isSchedulerEnabled) {
-          for (const schedule of script.schedules) {
-            scheduleScript(script, schedule)
-          }
-        } else {
-          console.log(`Script ${script.name} (ID: ${script.id}) scheduler is disabled. Skipping scheduling.`)
+    for (const script of scripts) {
+      const isScriptEnabled = schedulerState.scriptStates[script.id] ?? false
+      if (isScriptEnabled) {
+        for (const schedule of script.schedules) {
+          scheduleScript(script, schedule, schedulerState.globalEnabled)
         }
+      } else {
+        console.log(`Script ${script.name} (ID: ${script.id}) scheduler is disabled. Skipping scheduling.`)
       }
-    } else {
-      console.log('Global scheduler is disabled. No scripts will be scheduled.')
     }
 
     console.log('Scheduler initialized successfully')
@@ -69,7 +73,7 @@ export async function initializeScheduler(): Promise<void> {
   }
 }
 
-export function scheduleScript(script: Script, schedule: string): void {
+export function scheduleScript(script: Script, schedule: string, isGlobalSchedulerEnabled: boolean): void {
   const jobKey = `${script.id}_${schedule}`
 
   if (scheduledJobs[jobKey]) {
@@ -78,16 +82,18 @@ export function scheduleScript(script: Script, schedule: string): void {
 
   try {
     scheduledJobs[jobKey] = cron.schedule(schedule, async () => {
-      const isGlobalEnabled = await getGlobalSchedulerState()
-      if (isGlobalEnabled && script.isSchedulerEnabled) {
+      const currentState = await getSchedulerState()
+      if (currentState.globalEnabled && currentState.scriptStates[script.id]) {
         console.log(`Executing scheduled script: ${script.name} (ID: ${script.id})`)
         await executeScript(script)
       } else {
-        console.log(`Skipping execution of script ${script.name} (ID: ${script.id}). Global scheduler: ${isGlobalEnabled ? 'Enabled' : 'Disabled'}, Script scheduler: ${script.isSchedulerEnabled ? 'Enabled' : 'Disabled'}`)
+        console.log(`Skipping execution of script ${script.name} (ID: ${script.id}). Global scheduler: ${currentState.globalEnabled ? 'Enabled' : 'Disabled'}, Script scheduler: ${currentState.scriptStates[script.id] ? 'Enabled' : 'Disabled'}`)
       }
+    }, {
+      scheduled: isGlobalSchedulerEnabled
     })
 
-    console.log(`Scheduled script ${script.name} (ID: ${script.id}) with schedule: ${schedule}`)
+    console.log(`Scheduled script ${script.name} (ID: ${script.id}) with schedule: ${schedule}. Job ${isGlobalSchedulerEnabled ? 'started' : 'created but not started'}.`)
   } catch (error) {
     console.error(`Error scheduling script ${script.name} (ID: ${script.id}):`, error)
   }
@@ -159,20 +165,44 @@ async function executeScript(script: Script): Promise<void> {
   }
 }
 
-export async function updateSchedulerState(isEnabled: boolean): Promise<void> {
-  await fs.writeFile(schedulerStateFile, JSON.stringify({ isEnabled }), 'utf-8')
-  await initializeScheduler()
+export async function updateGlobalSchedulerState(isEnabled: boolean): Promise<void> {
+  const currentState = await getSchedulerState()
+  currentState.globalEnabled = isEnabled
+  await saveSchedulerState(currentState)
+  
+  // Update all existing jobs
+  for (const [jobKey, job] of Object.entries(scheduledJobs)) {
+    if (isEnabled) {
+      job.start()
+    } else {
+      job.stop()
+    }
+  }
+
+  console.log(`Global scheduler state updated to: ${isEnabled ? 'Enabled' : 'Disabled'}`)
 }
 
 export async function updateScriptSchedulerState(scriptId: string, isEnabled: boolean): Promise<void> {
-  const data = await fs.readFile(dataFile, 'utf-8')
-  const scripts: Script[] = JSON.parse(data)
-  const scriptIndex = scripts.findIndex(s => s.id === scriptId)
-  
-  if (scriptIndex !== -1) {
-    scripts[scriptIndex].isSchedulerEnabled = isEnabled
-    await fs.writeFile(dataFile, JSON.stringify(scripts, null, 2))
-    await initializeScheduler()
+  const currentState = await getSchedulerState()
+  currentState.scriptStates[scriptId] = isEnabled
+  await saveSchedulerState(currentState)
+
+  const scriptsData = await fs.readFile(dataFile, 'utf-8')
+  const scripts: Script[] = JSON.parse(scriptsData)
+  const script = scripts.find(s => s.id === scriptId)
+
+  if (script) {
+    // Remove existing schedules for this script
+    script.schedules.forEach(schedule => removeSchedule(scriptId, schedule))
+
+    // Reschedule if enabled
+    if (isEnabled) {
+      for (const schedule of script.schedules) {
+        scheduleScript(script, schedule, currentState.globalEnabled)
+      }
+    }
+
+    console.log(`Script ${script.name} (ID: ${scriptId}) scheduler state updated to: ${isEnabled ? 'Enabled' : 'Disabled'}`)
   }
 }
 
@@ -181,7 +211,7 @@ export default {
   initializeScheduler,
   scheduleScript,
   removeSchedule,
-  updateSchedulerState,
+  updateGlobalSchedulerState,
   updateScriptSchedulerState,
 }
 
