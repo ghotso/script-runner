@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import fs from 'fs/promises'
 import path from 'path'
 import { initializeDataDirectory } from '../../utils/init'
+import { initializeScheduler } from '../../../utils/scheduler'
 
 const schedulerStateFile = path.join(process.cwd(), 'data', 'scheduler-state.json')
 
