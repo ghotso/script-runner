@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { exec } from 'child_process'
+import { exec, ExecException } from 'child_process'
 import util from 'util'
 import fs from 'fs/promises'
 import path from 'path'
@@ -8,6 +8,11 @@ const execPromise = util.promisify(exec)
 const dataFile = path.join(process.cwd(), 'data', 'scripts.json')
 const scriptsDir = path.join(process.cwd(), 'scripts')
 const logsDir = path.join(process.cwd(), 'data', 'logs')
+
+interface ExecResult {
+  stdout: string;
+  stderr: string;
+}
 
 const isSuccess = (stdout: string, stderr: string, exitCode: number) => {
   if (exitCode !== 0) return false
@@ -47,11 +52,21 @@ export async function POST(request: Request, { params }: { params: { id: string 
       return NextResponse.json({ error: 'Unsupported script type' }, { status: 400 })
     }
 
-    const { stdout, stderr, exitCode = 0 } = await execPromise(command).catch(error => ({
-      stdout: '',
-      stderr: error.message,
-      exitCode: error.code
-    }))
+    let stdout = ''
+    let stderr = ''
+    let exitCode = 0
+
+    try {
+      const result: ExecResult = await execPromise(command)
+      stdout = result.stdout
+      stderr = result.stderr
+    } catch (error) {
+      const execError = error as ExecException
+      stdout = execError.stdout || ''
+      stderr = execError.stderr || execError.message
+      exitCode = execError.code || 1
+    }
+
     const runtime = Date.now() - startTime
     
     await fs.unlink(scriptPath)
