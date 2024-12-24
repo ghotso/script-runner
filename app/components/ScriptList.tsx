@@ -80,7 +80,7 @@ export default function ScriptList() {
         )
       )
 
-      showToast.success(`Scheduler ${!currentState ? 'enabled' : 'disabled'} for script`)
+      showToast.success(`Scheduler ${!currentState ? 'enabled' : 'disabled'} for script "${scripts.find(s => s.id === scriptId)?.name || 'Unknown'}"`)
     } catch (error) {
       console.error('Error updating scheduler state:', error)
       showToast.error('Failed to update scheduler state')

@@ -37,6 +37,13 @@ fi
 echo "Initializing scheduler..."
 node -e "require('./app/utils/scheduler').initializeScheduler()"
 
+# Check if Discord webhook is set
+if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+  echo "Warning: DISCORD_WEBHOOK_URL is not set. Discord notifications will be disabled."
+else
+  echo "Discord webhook is configured."
+fi
+
 # Start the Next.js application
 echo "Starting the application..."
 npm start
