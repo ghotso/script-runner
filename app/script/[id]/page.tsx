@@ -9,7 +9,7 @@ import { Label } from '../../components/ui/label'
 import { Play, Trash2, Clock, Save, Plus, Download, CheckCircle, XCircle, Loader, X, Timer, FileCode, Terminal, Tag, AlarmClock } from 'lucide-react'
 import { toast } from 'react-toastify'
 import { translateCronSchedule } from '../../utils/cron'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './Tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../components/ui/tooltip'
 
 type Execution = {
   id: string;
