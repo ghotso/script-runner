@@ -15,10 +15,10 @@ const navItems = [
   { href: '/settings', icon: Settings, label: 'Settings' },
 ]
 
-export default function Sidebar() {
+export function Sidebar() {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const { isGlobalSchedulerEnabled, toggleGlobalScheduler, isLoading } = useScheduler()
+  const { isGlobalSchedulerEnabled, toggleGlobalScheduler } = useScheduler()
 
   return (
     <>
@@ -49,14 +49,15 @@ export default function Sidebar() {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="mt-auto flex flex-col items-center">
-                <Power size={16} className={cn("mb-1", isGlobalSchedulerEnabled ? "text-green-500" : "text-red-500")} />
-                <Switch
-                  checked={isGlobalSchedulerEnabled}
-                  onCheckedChange={toggleGlobalScheduler}
-                  disabled={isLoading}
-                  className="data-[state=checked]:bg-green-500"
-                />
+              <div className="mt-auto">
+                <div className="flex flex-col items-center">
+                  <Power size={16} className={cn(isGlobalSchedulerEnabled ? "text-green-500" : "text-red-500")} />
+                  <Switch
+                    checked={isGlobalSchedulerEnabled}
+                    onCheckedChange={toggleGlobalScheduler}
+                    className="data-[state=checked]:bg-green-500"
+                  />
+                </div>
               </div>
             </TooltipTrigger>
             <TooltipContent side="right">
@@ -103,14 +104,10 @@ export default function Sidebar() {
                 </ul>
               </nav>
               <div className="mt-auto flex items-center justify-between w-full">
-                <span className="text-sm flex items-center">
-                  <Power size={16} className={cn("mr-2", isGlobalSchedulerEnabled ? "text-green-500" : "text-red-500")} />
-                  Global Scheduler
-                </span>
+                <span className="text-sm">Global Scheduler</span>
                 <Switch
                   checked={isGlobalSchedulerEnabled}
                   onCheckedChange={toggleGlobalScheduler}
-                  disabled={isLoading}
                   className="data-[state=checked]:bg-green-500"
                 />
               </div>

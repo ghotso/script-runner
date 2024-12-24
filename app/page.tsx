@@ -1,11 +1,19 @@
 'use client'
 
+import { useEffect } from 'react'
 import ScriptList from './components/ScriptList'
 import { Button } from './components/ui/button'
 import Link from 'next/link'
 import { Plus, FileCode } from 'lucide-react'
+import { useScheduler } from './contexts/SchedulerContext'
 
 export default function Home() {
+  const { isGlobalSchedulerEnabled } = useScheduler()
+
+  useEffect(() => {
+    console.log('Home component mounted')
+  }, [])
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">

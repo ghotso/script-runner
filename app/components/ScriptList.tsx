@@ -2,21 +2,16 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import { Search, Tag, FileCode, Terminal, CheckCircle, XCircle, Clock } from 'lucide-react'
+import { Search, Tag, FileCode, Terminal, CheckCircle, XCircle, Clock, Power } from 'lucide-react'
 import { Input } from './ui/input'
+import { Switch } from './ui/switch'
 import Select from 'react-select'
 import { showToast } from '../lib/toast'
 import { translateCronSchedule } from '../utils/cron'
+import { cn } from '../lib/utils'
+import { Script } from '../types/script'
 
 type TagOption = { value: string; label: string };
-type Script = {
-  id: string;
-  name: string;
-  type: string;
-  tags: string[];
-  schedules: string[];
-  executions: Array<{ status: 'success' | 'failed' }>;
-};
 
 const getRandomColor = () => {
   const letters = '0123456789ABCDEF'
@@ -31,9 +26,14 @@ export default function ScriptList() {
   const [scripts, setScripts] = useState<Script[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [updatingScheduler, setUpdatingScheduler] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchScripts = async () => {
+      setIsLoading(true)
+      setError(null)
       try {
         const response = await fetch('/api/scripts')
         if (!response.ok) {
@@ -44,12 +44,49 @@ export default function ScriptList() {
         showToast.success('Scripts loaded successfully')
       } catch (error) {
         console.error('Error fetching scripts:', error)
+        setError('Failed to load scripts. Please try again later.')
         showToast.error('Failed to load scripts')
+      } finally {
+        setIsLoading(false)
       }
     }
 
     fetchScripts()
   }, [])
+
+  const handleToggleScheduler = async (scriptId: string, currentState: boolean, event: React.MouseEvent) => {
+    event.preventDefault() // Prevent navigation
+    event.stopPropagation() // Stop event propagation
+    if (updatingScheduler) return
+
+    setUpdatingScheduler(scriptId)
+    try {
+      const response = await fetch(`/api/scripts/${scriptId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isSchedulerEnabled: !currentState })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update scheduler state')
+      }
+
+      setScripts(prevScripts => 
+        prevScripts.map(script => 
+          script.id === scriptId 
+            ? { ...script, isSchedulerEnabled: !currentState }
+            : script
+        )
+      )
+
+      showToast.success(`Scheduler ${!currentState ? 'enabled' : 'disabled'} for script`)
+    } catch (error) {
+      console.error('Error updating scheduler state:', error)
+      showToast.error('Failed to update scheduler state')
+    } finally {
+      setUpdatingScheduler(null)
+    }
+  }
 
   const allTags = useMemo(() => Array.from(new Set(scripts.flatMap(script => script.tags))), [scripts])
   const tagColors = useMemo(() => {
@@ -63,6 +100,14 @@ export default function ScriptList() {
     script.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
     (selectedTags.length === 0 || selectedTags.some(tag => script.tags.includes(tag)))
   )
+
+  if (isLoading) {
+    return <div>Loading scripts...</div>
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>
+  }
 
   return (
     <div className="space-y-6">
@@ -120,52 +165,63 @@ export default function ScriptList() {
       </div>
       <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {filteredScripts.map(script => (
-          <Link key={script.id} href={`/script/${script.id}`}>
-            <div className="glassmorphism p-4 hover:bg-white/20 transition duration-200 relative">
-              <div className="absolute top-2 right-2">
-                {script.executions && script.executions.length > 0 && (
-                  script.executions[0].status === 'success' ? (
-                    <CheckCircle className="text-green-500" size={20} />
+          <div key={script.id} className="relative">
+            <Link href={`/script/${script.id}`}>
+              <div className="glassmorphism p-4 hover:bg-white/20 transition duration-200 relative">
+                <div className="absolute top-2 right-2">
+                  {script.executions && script.executions.length > 0 && (
+                    script.executions[0].status === 'success' ? (
+                      <CheckCircle className="text-green-500" size={20} />
+                    ) : (
+                      <XCircle className="text-red-500" size={20} />
+                    )
+                  )}
+                </div>
+                <div className="flex items-center mb-2">
+                  {script.type === 'Python' ? (
+                    <FileCode className="mr-2 text-blue-500" size={24} />
                   ) : (
-                    <XCircle className="text-red-500" size={20} />
-                  )
-                )}
-              </div>
-              <div className="flex items-center mb-2">
-                {script.type === 'Python' ? (
-                  <FileCode className="mr-2 text-blue-500" size={24} />
-                ) : (
-                  <Terminal className="mr-2 text-green-500" size={24} />
-                )}
-                <h3 className="text-xl font-semibold text-primary">{script.name}</h3>
-              </div>
-              <p className="text-white mb-2">{script.type}</p>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {script.tags.map(tag => (
-                  <span 
-                    key={tag} 
-                    className="text-xs px-2 py-1 rounded-full flex items-center" 
-                    style={{ backgroundColor: tagColors[tag], color: 'white' }}
-                  >
-                    <Tag size={12} className="mr-1" />
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              <div className="text-sm text-white">
-                <h4 className="font-semibold mb-1 flex items-center">
-                  <Clock className="mr-1" size={14} />
-                  Schedules:
-                </h4>
-                <ul className="list-disc list-inside">
-                  {script.schedules.map((schedule, index) => (
-                    <li key={index}>{translateCronSchedule(schedule)}</li>
+                    <Terminal className="mr-2 text-green-500" size={24} />
+                  )}
+                  <h3 className="text-xl font-semibold text-primary">{script.name}</h3>
+                </div>
+                <p className="text-white mb-2">{script.type}</p>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {script.tags.map(tag => (
+                    <span 
+                      key={tag} 
+                      className="text-xs px-2 py-1 rounded-full flex items-center" 
+                      style={{ backgroundColor: tagColors[tag], color: 'white' }}
+                    >
+                      <Tag size={12} className="mr-1" />
+                      {tag}
+                    </span>
                   ))}
-                </ul>
-                {script.schedules.length === 0 && <p>No schedules set</p>}
+                </div>
+                <div className="text-sm text-white">
+                  <h4 className="font-semibold mb-1 flex items-center">
+                    <Clock className="mr-1" size={14} />
+                    Schedules:
+                  </h4>
+                  <ul className="list-disc list-inside">
+                    {script.schedules.map((schedule, index) => (
+                      <li key={index}>{translateCronSchedule(schedule)}</li>
+                    ))}
+                  </ul>
+                  {script.schedules.length === 0 && <p>No schedules set</p>}
+                </div>
               </div>
+            </Link>
+            <div className="absolute bottom-4 right-4 flex items-center gap-2 z-10">
+              <span className="text-sm text-muted-foreground">Scheduler</span>
+              <Switch
+                checked={script.isSchedulerEnabled}
+                onCheckedChange={(checked: boolean, event: React.MouseEvent) => handleToggleScheduler(script.id, script.isSchedulerEnabled, event)}
+                className="data-[state=checked]:bg-green-500"
+                disabled={updatingScheduler === script.id}
+              />
             </div>
-          </Link>
+          </div>
         ))}
       </div>
     </div>

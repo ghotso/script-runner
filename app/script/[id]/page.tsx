@@ -11,6 +11,8 @@ import { showToast } from '../../lib/toast'
 import { translateCronSchedule } from '../../utils/cron'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../components/ui/tooltip'
 import { Script } from '../../types/script'
+import { cn } from '../../lib/utils'
+import { Switch } from '../../components/ui/switch'
 
 export default function ScriptDetails({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -249,7 +251,16 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
           <FileCode className="h-8 w-8" />
           {script.name}
         </h1>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2 mr-2">
+            <Power size={16} className={cn(script.isSchedulerEnabled ? "text-green-500" : "text-red-500")} />
+            <span className="text-sm">Script Scheduler</span>
+            <Switch
+              checked={script.isSchedulerEnabled}
+              onCheckedChange={toggleScriptScheduler}
+              className="data-[state=checked]:bg-green-500"
+            />
+          </div>
           <Button onClick={handleRun} disabled={isRunning}>
             {isRunning ? (
               <>
@@ -279,14 +290,6 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
                 Install Dependencies
               </>
             )}
-          </Button>
-          <Button
-            onClick={toggleScriptScheduler}
-            variant={script.isSchedulerEnabled ? "default" : "destructive"}
-            className="flex items-center gap-2"
-          >
-            <Power className="h-4 w-4" />
-            {script.isSchedulerEnabled ? 'Disable' : 'Enable'} Scheduler
           </Button>
           <Button variant="destructive" onClick={handleDelete}>
             <Trash2 className="mr-2 h-4 w-4" />
