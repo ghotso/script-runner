@@ -30,7 +30,7 @@ export async function POST(request: Request) {
 
       let command
       if (script.type === 'Python') {
-        command = `python ${scriptPath}`
+        command = `${process.env.VIRTUAL_ENV}/bin/python ${scriptPath}`
       } else if (script.type === 'Bash') {
         command = `bash ${scriptPath}`
       } else {
@@ -39,7 +39,22 @@ export async function POST(request: Request) {
       }
 
       try {
+        const startTime = Date.now()
         const { stdout, stderr } = await execPromise(command)
+        const endTime = Date.now()
+        const runtime = endTime - startTime
+
+        const execution = {
+          id: Date.now().toString(),
+          status: stderr ? 'failed' : 'success',
+          timestamp: new Date().toISOString(),
+          log: stdout || stderr,
+          runtime
+        }
+
+        script.executions = [execution, ...(script.executions || [])].slice(0, 10)
+        await fs.writeFile(dataFile, JSON.stringify(scripts, null, 2))
+
         console.log(`Script ${script.id} executed:`, stdout)
         if (stderr) {
           console.error(`Script ${script.id} error:`, stderr)

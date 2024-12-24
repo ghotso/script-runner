@@ -304,8 +304,8 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
               <table className="w-full">
                 <thead className="border-b bg-muted/50">
                   <tr>
-                    <th className="h-10 px-2 text-left align-middle font-medium text-muted-foreground">Schedule</th>
-                    <th className="h-10 px-2 text-left align-middle font-medium text-muted-foreground">Next Run</th>
+                    <th className="h-10 px-2 text-left align-middle font-medium text-muted-foreground">Cron</th>
+                    <th className="h-10 px-2 text-left align-middle font-medium text-muted-foreground">Translation</th>
                     <th className="h-10 w-[50px]"></th>
                   </tr>
                 </thead>

@@ -47,10 +47,19 @@ export async function POST(request: Request, { params }: { params: { id: string 
       }, { status: 500 })
     }
 
-    return NextResponse.json({ 
-      message: 'Dependencies installed successfully!',
-      details: stdout
-    })
+    const installedDependencies = stdout.split('\n').filter(line => line.includes('Successfully installed')).join('\n')
+
+    if (installedDependencies) {
+      return NextResponse.json({ 
+        message: 'Dependencies installed successfully!',
+        details: installedDependencies
+      })
+    } else {
+      return NextResponse.json({ 
+        message: 'No new dependencies were installed. All required packages are already up to date.',
+        details: stdout
+      })
+    }
   } catch (error) {
     console.error('Error installing dependencies:', error)
     return NextResponse.json({ 
