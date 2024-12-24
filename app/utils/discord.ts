@@ -7,7 +7,7 @@ async function getDiscordWebhook() {
   try {
     const data = await fs.readFile(settingsFile, 'utf-8')
     const settings = JSON.parse(data)
-    return settings.discordWebhook
+    return settings.discordWebhook || null
   } catch (error) {
     console.error('Failed to read Discord webhook:', error)
     return null
@@ -17,7 +17,7 @@ async function getDiscordWebhook() {
 export async function sendDiscordNotification(message: string) {
   const webhookUrl = await getDiscordWebhook()
   if (!webhookUrl) {
-    console.error('Discord webhook URL not set')
+    console.log('Discord webhook URL not set. Skipping notification.')
     return
   }
 
@@ -33,6 +33,7 @@ export async function sendDiscordNotification(message: string) {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
+    console.log('Discord notification sent successfully')
   } catch (error) {
     console.error('Failed to send Discord notification:', error)
   }
