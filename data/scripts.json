@@ -1,1 +1,31 @@
-[]
+[
+  {
+    "name": "test",
+    "type": "Python",
+    "tags": [
+      "test"
+    ],
+    "schedules": [
+      "0 2 * * *",
+      "* * * * *",
+      "0 1 * * *",
+      "0 8 * * 1",
+      "0 3 * * *"
+    ],
+    "code": "test",
+    "dependencies": "plexapi",
+    "id": "1735065986511",
+    "executions": [],
+    "isSchedulerEnabled": false
+  },
+  {
+    "name": "test2",
+    "type": "Bash",
+    "tags": [],
+    "schedules": [],
+    "code": "test",
+    "dependencies": "test",
+    "id": "1735067927277",
+    "executions": []
+  }
+]

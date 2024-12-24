@@ -1,0 +1,16 @@
+{
+  "name": "Script Runner",
+  "short_name": "ScriptRunner",
+  "icons": [
+    {
+      "src": "/script-opened-svgrepo-com.svg",
+      "sizes": "48x48 72x72 96x96 128x128 256x256 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#000000",
+  "background_color": "#000000",
+  "display": "standalone"
+}
+

@@ -10,6 +10,13 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'Script Runner',
   description: 'Run and manage your Python and Bash scripts',
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    apple: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({
@@ -19,7 +26,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} bg-background text-foreground min-h-screen flex`}>
+      <body className={`${inter.className} bg-gradient-to-br from-[#020817] to-[#0f1729] text-foreground min-h-screen flex`}>
         <SchedulerProvider>
           <>
             <Sidebar />

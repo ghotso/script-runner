@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
-import { updateSchedulerState } from '../../utils/scheduler'
 import fs from 'fs/promises'
 import path from 'path'
+import { initializeDataDirectory } from '../../utils/init'
 
 const schedulerStateFile = path.join(process.cwd(), 'data', 'scheduler-state.json')
 
 async function getSchedulerState() {
+  await initializeDataDirectory()
   try {
     const data = await fs.readFile(schedulerStateFile, 'utf-8')
     return JSON.parse(data)
@@ -28,7 +29,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const { isEnabled } = await request.json()
-    await updateSchedulerState(isEnabled)
+    await fs.writeFile(schedulerStateFile, JSON.stringify({ isEnabled }), 'utf-8')
     return NextResponse.json({ isEnabled })
   } catch (error) {
     console.error('Failed to update scheduler state:', error)

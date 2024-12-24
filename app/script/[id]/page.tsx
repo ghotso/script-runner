@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, KeyboardEvent } from 'react'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import CodeEditor from '../../components/CodeEditor'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
@@ -14,17 +14,20 @@ import { Script } from '../../types/script'
 import { cn } from '../../lib/utils'
 import { Switch } from '../../components/ui/switch'
 
-export default function ScriptDetails({ params }: { params: { id: string } }) {
+export default function ScriptDetails() {
   const router = useRouter()
+  const params = useParams()
   const [isRunning, setIsRunning] = useState(false)
   const [isInstallingDependencies, setIsInstallingDependencies] = useState(false)
   const [script, setScript] = useState<Script | null>(null)
   const [newTag, setNewTag] = useState('')
   const [newSchedule, setNewSchedule] = useState('')
   const [selectedExecution, setSelectedExecution] = useState<Script['executions'][0] | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     const fetchScript = async () => {
+      setIsLoading(true)
       try {
         const response = await fetch(`/api/scripts/${params.id}`)
         if (!response.ok) {
@@ -35,10 +38,14 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
       } catch (error) {
         console.error('Error fetching script:', error)
         showToast.error('Failed to load script')
+      } finally {
+        setIsLoading(false)
       }
     }
 
-    fetchScript()
+    if (params.id) {
+      fetchScript()
+    }
   }, [params.id])
 
   const handleRun = async () => {
@@ -230,6 +237,7 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
 
   const toggleScriptScheduler = async () => {
     if (!script) return
+    setIsLoading(true)
     try {
       const updatedScript = { ...script, isSchedulerEnabled: !script.isSchedulerEnabled }
       await saveChanges(updatedScript)
@@ -237,11 +245,13 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
       showToast.success(`Script scheduler ${updatedScript.isSchedulerEnabled ? 'enabled' : 'disabled'}`)
     } catch (error) {
       showToast.error('Failed to update script scheduler state')
+    } finally {
+      setIsLoading(false)
     }
   }
 
   if (!script) {
-    return <div>Loading...</div>
+    return <div className="glassmorphism p-6 rounded-lg">Loading...</div>
   }
 
   return (
@@ -252,15 +262,40 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
           {script.name}
         </h1>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-2 mr-2">
-            <Power size={16} className={cn(script.isSchedulerEnabled ? "text-green-500" : "text-red-500")} />
-            <span className="text-sm">Script Scheduler</span>
+          <div 
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10"
+          >
+            <Power 
+              className={cn(
+                "h-4 w-4",
+                script.isSchedulerEnabled ? "text-green-500" : "text-red-500"
+              )} 
+            />
+            <span className="text-sm text-white/90">Scheduler</span>
             <Switch
               checked={script.isSchedulerEnabled}
               onCheckedChange={toggleScriptScheduler}
-              className="data-[state=checked]:bg-green-500"
+              className={cn(
+                "data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-600",
+                "transition-opacity",
+                isLoading && "opacity-50 cursor-not-allowed"
+              )}
+              disabled={isLoading}
             />
           </div>
+          <Button onClick={handleInstallDependencies} disabled={isInstallingDependencies}>
+            {isInstallingDependencies ? (
+              <>
+                <Loader className="mr-2 h-4 w-4 animate-spin" />
+                Installing...
+              </>
+            ) : (
+              <>
+                <Download className="mr-2 h-4 w-4" />
+                Install Dependencies
+              </>
+            )}
+          </Button>
           <Button onClick={handleRun} disabled={isRunning}>
             {isRunning ? (
               <>
@@ -278,19 +313,6 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
             <Save className="mr-2 h-4 w-4" />
             Save Changes
           </Button>
-          <Button onClick={handleInstallDependencies} disabled={isInstallingDependencies}>
-            {isInstallingDependencies ? (
-              <>
-                <Loader className="mr-2 h-4 w-4 animate-spin" />
-                Installing...
-              </>
-            ) : (
-              <>
-                <Download className="mr-2 h-4 w-4" />
-                Install Dependencies
-              </>
-            )}
-          </Button>
           <Button variant="destructive" onClick={handleDelete}>
             <Trash2 className="mr-2 h-4 w-4" />
             Delete Script
@@ -299,8 +321,8 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-4">
-          <div>
-            <Label htmlFor="dependencies" className="flex items-center gap-2">
+          <div className="glassmorphism p-4 rounded-lg">
+            <Label htmlFor="dependencies" className="flex items-center gap-2 mb-2">
               <FileCode className="h-4 w-4" />
               Dependencies
             </Label>
@@ -310,8 +332,8 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
               language="plaintext"
             />
           </div>
-          <div>
-            <Label htmlFor="code" className="flex items-center gap-2">
+          <div className="glassmorphism p-4 rounded-lg">
+            <Label htmlFor="code" className="flex items-center gap-2 mb-2">
               <Terminal className="h-4 w-4" />
               Script Code
             </Label>
@@ -323,12 +345,12 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
           </div>
         </div>
         <div className="space-y-4">
-          <div>
-            <Label htmlFor="schedules" className="flex items-center gap-2">
+          <div className="glassmorphism p-4 rounded-lg">
+            <Label htmlFor="schedules" className="flex items-center gap-2 mb-2">
               <Clock className="h-4 w-4" />
               Schedules
             </Label>
-            <div className="flex space-x-2">
+            <div className="flex space-x-2 mb-2">
               <Input
                 id="schedules"
                 value={newSchedule}
@@ -380,12 +402,12 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
               </table>
             </div>
           </div>
-          <div>
-            <Label htmlFor="tags" className="flex items-center gap-2">
+          <div className="glassmorphism p-4 rounded-lg">
+            <Label htmlFor="tags" className="flex items-center gap-2 mb-2">
               <Tag className="h-4 w-4" />
               Tags
             </Label>
-            <div className="flex space-x-2">
+            <div className="flex space-x-2 mb-2">
               <Input
                 id="tags"
                 value={newTag}
@@ -415,8 +437,8 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
               ))}
             </div>
           </div>
-          <div>
-            <Label className="flex items-center gap-2">
+          <div className="glassmorphism p-4 rounded-lg">
+            <Label className="flex items-center gap-2 mb-2">
               <Clock className="h-4 w-4" />
               Execution History
             </Label>

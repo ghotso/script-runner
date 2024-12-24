@@ -2,10 +2,17 @@
 const nextConfig = {
   reactStrictMode: true,
   webpack(config) {
+    // Handle source maps
     config.module.rules.push({
       test: /\.(ico|png|jpg|jpeg|gif|svg)$/,
       type: 'asset/resource',
     })
+
+    // Disable source maps in production
+    if (!config.dev) {
+      config.devtool = false;
+    }
+
     return config
   },
   // Explicitly set the asset prefix to ensure correct paths in production

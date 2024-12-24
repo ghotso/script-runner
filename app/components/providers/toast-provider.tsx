@@ -16,6 +16,7 @@ export function ToastProvider() {
       draggable
       pauseOnHover
       theme="dark"
+      transition={undefined} // Let react-toastify handle the transition internally
     />
   )
 }

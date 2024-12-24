@@ -1,15 +1,2 @@
 [Binary file content for a script file icon]
 
-// Check if favicon.ico exists in the public directory
-const fs = require('node:fs');
-const path = require('node:path');
-const faviconPath = path.join(__dirname, 'public', 'favicon.ico');
-
-if (!fs.existsSync(faviconPath)) {
-  // If not, create a dummy favicon.ico file.  In a real application, you'd likely copy a real favicon.ico file.
-  fs.writeFileSync(faviconPath, '');
-  console.log('Created dummy favicon.ico in public directory.');
-} else {
-  console.log('favicon.ico already exists in public directory.');
-}
-

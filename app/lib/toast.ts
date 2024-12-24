@@ -1,4 +1,6 @@
-import { toast, ToastOptions } from 'react-toastify'
+'use client'
+
+import { toast, ToastOptions, Slide } from 'react-toastify'
 
 const defaultOptions: ToastOptions = {
   position: "bottom-right",
@@ -7,6 +9,9 @@ const defaultOptions: ToastOptions = {
   closeOnClick: true,
   pauseOnHover: true,
   draggable: true,
+  progress: undefined,
+  transition: Slide,
+  theme: "dark"
 }
 
 export const showToast = {

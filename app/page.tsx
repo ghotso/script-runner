@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import ScriptList from './components/ScriptList'
 import { Button } from './components/ui/button'
 import Link from 'next/link'
@@ -9,15 +9,17 @@ import { useScheduler } from './contexts/SchedulerContext'
 
 export default function Home() {
   const { isGlobalSchedulerEnabled } = useScheduler()
+  const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
-    console.log('Home component mounted')
+    setIsLoaded(true)
+    return () => setIsLoaded(false)
   }, [])
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
+      <div className="flex justify-between items-center bg-gray-800/50 p-4 rounded-lg border border-gray-700">
+        <h1 className="text-3xl font-bold text-white flex items-center gap-2">
           <FileCode className="h-8 w-8" />
           Scripts
         </h1>
@@ -29,7 +31,7 @@ export default function Home() {
           </Link>
         </div>
       </div>
-      <ScriptList />
+      {isLoaded && <ScriptList />}
     </div>
   )
 }

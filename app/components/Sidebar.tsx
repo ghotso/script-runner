@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { FileCode, Home, PlusCircle, Settings, Menu, X, Power } from 'lucide-react'
+import { Home, PlusCircle, Settings, Menu, X, Power } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { useState } from 'react'
 import { useScheduler } from '../contexts/SchedulerContext'
@@ -24,7 +24,11 @@ export function Sidebar() {
     <>
       <aside className="glassmorphism w-16 h-screen fixed left-0 top-0 p-4 flex flex-col items-center z-50 hidden sm:flex">
         <div className="mb-8">
-          <FileCode size={32} className="text-primary" />
+          <img 
+            src="/script-opened-svgrepo-com.svg" 
+            alt="Script Runner Logo" 
+            className="w-12 h-12 text-primary"
+          />
         </div>
         <nav className="flex-1">
           <ul className="space-y-4">
@@ -50,12 +54,17 @@ export function Sidebar() {
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="mt-auto">
-                <div className="flex flex-col items-center">
-                  <Power size={16} className={cn(isGlobalSchedulerEnabled ? "text-green-500" : "text-red-500")} />
+                <div className="flex flex-col items-center gap-1">
+                  <Power 
+                    size={16} 
+                    className={cn(
+                      isGlobalSchedulerEnabled ? "text-green-500" : "text-red-500"
+                    )} 
+                  />
                   <Switch
                     checked={isGlobalSchedulerEnabled}
                     onCheckedChange={toggleGlobalScheduler}
-                    className="data-[state=checked]:bg-green-500"
+                    className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-600"
                   />
                 </div>
               </div>
@@ -105,11 +114,19 @@ export function Sidebar() {
               </nav>
               <div className="mt-auto flex items-center justify-between w-full">
                 <span className="text-sm">Global Scheduler</span>
-                <Switch
-                  checked={isGlobalSchedulerEnabled}
-                  onCheckedChange={toggleGlobalScheduler}
-                  className="data-[state=checked]:bg-green-500"
-                />
+                <div className="flex items-center gap-2">
+                  <Power 
+                    size={16} 
+                    className={cn(
+                      isGlobalSchedulerEnabled ? "text-green-500" : "text-red-500"
+                    )} 
+                  />
+                  <Switch
+                    checked={isGlobalSchedulerEnabled}
+                    onCheckedChange={toggleGlobalScheduler}
+                    className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-600"
+                  />
+                </div>
               </div>
             </aside>
           </div>

@@ -1,14 +1,15 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs/promises'
 import path from 'path'
 
 const dataFile = path.join(process.cwd(), 'data', 'scripts.json')
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest) {
   try {
+    const id = request.url.split('/').pop()
     const data = await fs.readFile(dataFile, 'utf-8')
     const scripts = JSON.parse(data)
-    const script = scripts.find((s: any) => s.id === params.id)
+    const script = scripts.find((s: any) => s.id === id)
     if (!script) {
       return NextResponse.json({ error: 'Script not found' }, { status: 404 })
     }
@@ -19,12 +20,13 @@ export async function GET(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest) {
   try {
+    const id = request.url.split('/').pop()
     const updatedScript = await request.json()
     const data = await fs.readFile(dataFile, 'utf-8')
     let scripts = JSON.parse(data)
-    const index = scripts.findIndex((s: any) => s.id === params.id)
+    const index = scripts.findIndex((s: any) => s.id === id)
     if (index === -1) {
       return NextResponse.json({ error: 'Script not found' }, { status: 404 })
     }
@@ -37,11 +39,12 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest) {
   try {
+    const id = request.url.split('/').pop()
     const data = await fs.readFile(dataFile, 'utf-8')
     let scripts = JSON.parse(data)
-    scripts = scripts.filter((s: any) => s.id !== params.id)
+    scripts = scripts.filter((s: any) => s.id !== id)
     await fs.writeFile(dataFile, JSON.stringify(scripts, null, 2))
     return NextResponse.json({ message: 'Script deleted successfully' })
   } catch (error) {
