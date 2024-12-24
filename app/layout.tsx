@@ -10,10 +10,6 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'Script Runner',
   description: 'Run and manage your Python and Bash scripts',
-  icons: [
-    { rel: 'icon', url: '/favicon.ico' },
-    { rel: 'apple-touch-icon', url: '/favicon.ico' },
-  ],
 }
 
 export default function RootLayout({
@@ -25,6 +21,7 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       <body className={`${inter.className} bg-background text-foreground min-h-screen flex`}>
         <SchedulerProvider>
