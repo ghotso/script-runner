@@ -3,12 +3,16 @@ import { Inter } from 'next/font/google'
 import Sidebar from './components/Sidebar'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { Metadata } from 'next'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Script Runner',
   description: 'Run and manage your Python and Bash scripts',
+  icons: {
+    icon: '/favicon.ico',
+  },
 }
 
 export default function RootLayout({

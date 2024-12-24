@@ -15,9 +15,9 @@ interface ExecResult {
 }
 
 const isSuccess = (stdout: string, stderr: string, exitCode: number) => {
-  if (exitCode !== 0) return false
-  if (stderr && stderr.trim() !== '') return false
-  return true
+  // Consider the execution successful if there's output in stdout,
+  // even if stderr is not empty (as some scripts might use stderr for non-error messages)
+  return exitCode === 0 && stdout.trim() !== '';
 }
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
@@ -76,7 +76,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
       id: Date.now().toString(),
       status: success ? 'success' : 'failed',
       timestamp: new Date().toISOString(),
-      log: stdout || stderr,
+      log: stdout + (stderr ? '\nErrors/Warnings:\n' + stderr : ''),
       runtime,
       triggeredBySchedule: false
     }
@@ -84,14 +84,15 @@ export async function POST(request: Request, { params }: { params: { id: string 
     scripts[scriptIndex].executions = [execution, ...(scripts[scriptIndex].executions || [])].slice(0, 10)
     await fs.writeFile(dataFile, JSON.stringify(scripts, null, 2))
 
-    // Log to file
-    const logFile = path.join(logsDir, `${script.id}.log`)
-    await fs.appendFile(logFile, `${new Date().toISOString()} - ${execution.status}\n${stdout || stderr}\n\n`)
+    // Log to file with improved naming
+    const logFileName = `${script.id}_${execution.timestamp.replace(/:/g, '-')}.log`
+    const logFile = path.join(logsDir, logFileName)
+    await fs.writeFile(logFile, `${execution.timestamp} - ${execution.status}\n${execution.log}\n`)
 
     console.log(`Script execution result:`, { stdout, stderr, exitCode, status: execution.status })
 
     return NextResponse.json({ 
-      message: success ? 'Script executed successfully' : 'Script execution failed',
+      message: success ? 'Script executed successfully' : 'Script execution completed with warnings or errors',
       execution,
       output: stdout,
       error: stderr
@@ -109,13 +110,9 @@ export async function POST(request: Request, { params }: { params: { id: string 
       triggeredBySchedule: false
     }
 
-    // Attempt to log the error
-    try {
-      const logFile = path.join(logsDir, 'error.log')
-      await fs.appendFile(logFile, `${new Date().toISOString()} - Error executing script: ${JSON.stringify(execution)}\n\n`)
-    } catch (logError) {
-      console.error('Failed to write to error log:', logError)
-    }
+    // Log the error
+    const errorLogFile = path.join(logsDir, 'error.log')
+    await fs.appendFile(errorLogFile, `${execution.timestamp} - Error executing script: ${JSON.stringify(execution)}\n\n`)
 
     return NextResponse.json({ 
       error: 'Failed to run script',

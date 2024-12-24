@@ -4,10 +4,10 @@ FROM node:18-alpine AS builder
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY package.json ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies and generate a new package-lock.json
+RUN npm install
 
 # Copy source code
 COPY . .
@@ -37,6 +37,7 @@ RUN mkdir -p /app/data/logs && chmod 755 /app/data/logs
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/package-lock.json ./package-lock.json
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/lib ./lib
 
@@ -58,6 +59,6 @@ USER nextjs
 # Expose the port
 EXPOSE 3000
 
-# Start the application
-CMD ["npm", "start"]
+# Start the application and redirect logs
+CMD ["sh", "-c", "npm start > /app/data/logs/container.log 2>&1"]
 
