@@ -27,7 +27,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
       await fs.writeFile(requirementsPath, script.dependencies)
       command = `${process.env.VIRTUAL_ENV}/bin/pip install -r ${requirementsPath}`
     } else if (script.type === 'Bash') {
-      const dependencies = script.dependencies.split('\n').filter(dep => dep.trim() !== '')
+      const dependencies = script.dependencies.split('\n').filter((dep: string) => dep.trim() !== '')
       for (const dep of dependencies) {
         try {
           await execPromise(`which ${dep}`)
