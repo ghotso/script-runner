@@ -15,9 +15,9 @@ interface ExecResult {
 }
 
 const isSuccess = (stdout: string, stderr: string, exitCode: number) => {
-  // Consider the execution successful if there's output in stdout,
-  // even if stderr is not empty (as some scripts might use stderr for non-error messages)
-  return exitCode === 0 && stdout.trim() !== '';
+  // Consider the execution successful if the exit code is 0,
+  // regardless of stdout or stderr content
+  return exitCode === 0;
 }
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
@@ -92,7 +92,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     console.log(`Script execution result:`, { stdout, stderr, exitCode, status: execution.status })
 
     return NextResponse.json({ 
-      message: success ? 'Script executed successfully' : 'Script execution completed with warnings or errors',
+      message: success ? 'Script executed successfully' : 'Script execution completed with non-zero exit code',
       execution,
       output: stdout,
       error: stderr

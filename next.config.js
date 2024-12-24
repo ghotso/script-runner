@@ -8,6 +8,8 @@ const nextConfig = {
     })
     return config
   },
+  // Explicitly set the asset prefix to ensure correct paths in production
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/' : '',
 }
 
 module.exports = nextConfig

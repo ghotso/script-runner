@@ -4,15 +4,22 @@ import Sidebar from './components/Sidebar'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { Metadata } from 'next'
+import { initializeScheduler } from './utils/scheduler'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Script Runner',
   description: 'Run and manage your Python and Bash scripts',
-  icons: {
-    icon: '/favicon.ico',
-  },
+  icons: [
+    { rel: 'icon', url: '/favicon.ico' },
+    { rel: 'apple-touch-icon', url: '/favicon.ico' },
+  ],
+}
+
+// Initialize the scheduler
+if (typeof window === 'undefined') {
+  initializeScheduler().catch(console.error)
 }
 
 export default function RootLayout({
@@ -22,6 +29,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+      </head>
       <body className={`${inter.className} bg-background text-foreground min-h-screen flex`}>
         <Sidebar />
         <main className="flex-grow ml-16 p-4 sm:p-6 md:p-8">

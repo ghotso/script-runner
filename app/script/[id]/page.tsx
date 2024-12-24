@@ -77,11 +77,7 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
         }
       })
 
-      if (data.execution.status === 'success') {
-        toast.success('Script executed successfully!')
-      } else {
-        toast.error('Script execution failed. Check the logs for details.')
-      }
+      toast.success(data.message || 'Script executed successfully!')
     } catch (error) {
       console.error('Error running script:', error)
       toast.error(error instanceof Error ? error.message : 'Failed to execute script')

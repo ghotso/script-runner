@@ -31,7 +31,7 @@ WORKDIR /app
 RUN mkdir -p /app/scripts
 
 # Create data and logs directories with proper permissions
-RUN mkdir -p /app/data/logs && chmod 755 /app/data/logs
+RUN mkdir -p /app/data/logs && chmod 777 /app/data/logs
 
 # Copy built assets from builder
 COPY --from=builder /app/.next ./.next
@@ -45,16 +45,16 @@ COPY --from=builder /app/lib ./lib
 COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/data ./data
 
+# Explicitly copy the favicon
+COPY --from=builder /app/public/favicon.ico ./public/favicon.ico
+
 # Set up Python virtual environment
 ENV VIRTUAL_ENV=/app/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
-RUN chown -R nextjs:nodejs /app
-USER nextjs
+# Give necessary permissions
+RUN chmod -R 777 /app
 
 # Expose the port
 EXPOSE 3000
