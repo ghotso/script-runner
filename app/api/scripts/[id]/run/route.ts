@@ -3,7 +3,7 @@ import { exec, ExecException } from 'child_process'
 import util from 'util'
 import fs from 'fs/promises'
 import path from 'path'
-import { sendDiscordNotification } from '@/utils/discord'
+import { sendDiscordNotification } from '../../../../utils/discord'
 
 const execPromise = util.promisify(exec)
 const dataFile = path.join(process.cwd(), 'data', 'scripts.json')
