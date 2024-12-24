@@ -9,6 +9,7 @@ import { Label } from '../../components/ui/label'
 import { Play, Trash2, Clock, Save, Plus, Download, CheckCircle, XCircle, Loader, X, Timer, FileCode, Terminal, Tag, AlarmClock } from 'lucide-react'
 import { toast } from 'react-toastify'
 import { translateCronSchedule } from '../../utils/cron'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './Tooltip'
 
 type Execution = {
   id: string;
@@ -408,7 +409,16 @@ export default function ScriptDetails({ params }: { params: { id: string } }) {
                     <Timer className="h-3 w-3" />
                     <span>{execution.runtime ? `${(execution.runtime / 1000).toFixed(1)}s` : 'N/A'}</span>
                     {execution.triggeredBySchedule && (
-                      <AlarmClock className="h-3 w-3 ml-2" title="Triggered by schedule" />
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <AlarmClock className="h-3 w-3 ml-2" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Triggered by schedule</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     )}
                   </div>
                 </div>
