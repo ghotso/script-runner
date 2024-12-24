@@ -54,9 +54,7 @@ export default function ScriptList() {
     fetchScripts()
   }, [])
 
-  const handleToggleScheduler = async (scriptId: string, currentState: boolean, event: React.MouseEvent) => {
-    event.preventDefault() // Prevent navigation
-    event.stopPropagation() // Stop event propagation
+  const handleToggleScheduler = async (scriptId: string, currentState: boolean) => {
     if (updatingScheduler) return
 
     setUpdatingScheduler(scriptId)
@@ -216,7 +214,7 @@ export default function ScriptList() {
               <span className="text-sm text-muted-foreground">Scheduler</span>
               <Switch
                 checked={script.isSchedulerEnabled}
-                onCheckedChange={(checked: boolean, event: React.MouseEvent) => handleToggleScheduler(script.id, script.isSchedulerEnabled, event)}
+                onCheckedChange={(checked: boolean) => handleToggleScheduler(script.id, script.isSchedulerEnabled)}
                 className="data-[state=checked]:bg-green-500"
                 disabled={updatingScheduler === script.id}
               />
