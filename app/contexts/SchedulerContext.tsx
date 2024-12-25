@@ -4,14 +4,18 @@ import React, { createContext, useContext, useState, useEffect } from 'react'
 import { showToast } from '../lib/toast'
 
 interface SchedulerContextType {
-  isGlobalSchedulerEnabled: boolean
-  isLoading: boolean
-  toggleGlobalScheduler: () => Promise<void>
+  isGlobalSchedulerEnabled: boolean;
+  setIsGlobalSchedulerEnabled: (isEnabled: boolean) => void;
+  isLoading: boolean;
+  setIsLoading: (isLoading: boolean) => void;
+  toggleGlobalScheduler: () => Promise<void>;
 }
 
 const SchedulerContext = createContext<SchedulerContextType>({
   isGlobalSchedulerEnabled: false,
   isLoading: true,
+  setIsGlobalSchedulerEnabled: () => {},
+  setIsLoading: () => {},
   toggleGlobalScheduler: async () => {},
 })
 
@@ -76,7 +80,9 @@ export function SchedulerProvider({
 
   const value = {
     isGlobalSchedulerEnabled,
+    setIsGlobalSchedulerEnabled,
     isLoading,
+    setIsLoading,
     toggleGlobalScheduler,
   }
 
