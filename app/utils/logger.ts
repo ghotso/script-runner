@@ -1,10 +1,11 @@
 import fs from 'fs/promises'
+import { createWriteStream, existsSync } from 'fs'
 import path from 'path'
-import { createWriteStream } from 'fs'
 
 const logsDir = path.join(process.cwd(), 'data', 'logs')
 const maxLogSize = 5 * 1024 * 1024 // 5 MB
 const maxLogAge = 30 * 24 * 60 * 60 * 1000 // 30 days in milliseconds
+const maxLogFiles = 10 // Maximum number of log files to keep per script
 
 enum LogLevel {
   INFO = 'INFO',
@@ -31,8 +32,28 @@ async function rotateLogIfNeeded(logFile: string) {
   try {
     const stats = await fs.stat(logFile)
     if (stats.size >= maxLogSize) {
-      const newLogFile = `${logFile}.${Date.now()}`
+      const timestamp = new Date().toISOString().replace(/:/g, '-')
+      const newLogFile = `${logFile}.${timestamp}`
       await fs.rename(logFile, newLogFile)
+      
+      // Remove old log files if there are too many
+      const logFiles = await fs.readdir(logsDir)
+      const relatedLogs = logFiles.filter(file => file.startsWith(path.basename(logFile)))
+      if (relatedLogs.length > maxLogFiles) {
+        const oldestLogs = await Promise.all(
+          relatedLogs.map(async (file) => {
+            const filePath = path.join(logsDir, file);
+            const stats = await fs.stat(filePath);
+            return { file, mtime: stats.mtime.getTime() };
+          })
+        );
+        oldestLogs.sort((a, b) => a.mtime - b.mtime);
+        const logsToDelete = oldestLogs.slice(0, relatedLogs.length - maxLogFiles);
+        
+        for (const { file } of logsToDelete) {
+          await fs.unlink(path.join(logsDir, file));
+        }
+      }
     }
   } catch (error) {
     // If the file doesn't exist, no need to rotate

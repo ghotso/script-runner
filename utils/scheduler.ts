@@ -18,6 +18,7 @@ interface Script {
   code: string;
   schedules: string[];
   executions: any[];
+  isSchedulerEnabled: boolean;
 }
 
 interface SchedulerState {
@@ -42,7 +43,7 @@ async function saveSchedulerState(state: SchedulerState): Promise<void> {
     await fs.writeFile(schedulerStateFile, JSON.stringify(state, null, 2), 'utf-8')
     logInfo('scheduler', 'Scheduler state saved successfully', { state })
   } catch (error) {
-    logError('scheduler', 'Error saving scheduler state', { error, state })
+    logError('scheduler', 'Error saving scheduler state', { error })
     throw error
   }
 }

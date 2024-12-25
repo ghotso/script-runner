@@ -31,18 +31,15 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { action, scriptId, isEnabled } = await request.json()
+    const { isEnabled } = await request.json()
     
-    if (action === 'updateGlobal') {
-      await scheduler.updateGlobalSchedulerState(isEnabled)
-      logInfo('api', 'Updated global scheduler state', { isEnabled })
-    } else if (action === 'updateScript' && scriptId) {
-      await scheduler.updateScriptSchedulerState(scriptId, isEnabled)
-      logInfo('api', 'Updated script scheduler state', { scriptId, isEnabled })
-    } else {
-      logError('api', 'Invalid action in scheduler update', { action, scriptId, isEnabled })
-      return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
+    if (typeof isEnabled !== 'boolean') {
+      logError('api', 'Invalid isEnabled value in scheduler update', { isEnabled })
+      return NextResponse.json({ error: 'Invalid isEnabled value' }, { status: 400 })
     }
+
+    await scheduler.updateGlobalSchedulerState(isEnabled)
+    logInfo('api', 'Updated global scheduler state', { isEnabled })
 
     const updatedState = await getSchedulerState()
     return NextResponse.json(updatedState)
