@@ -33,7 +33,7 @@ async function getSchedulerState(): Promise<SchedulerState> {
     return JSON.parse(data)
   } catch (error) {
     logError('scheduler', 'Error reading scheduler state', { error })
-    return { globalEnabled: false, scriptStates: {} }
+    return { globalEnabled: true, scriptStates: {} }
   }
 }
 
@@ -62,7 +62,7 @@ export async function initializeScheduler(): Promise<void> {
     Object.keys(scheduledJobs).forEach(key => delete scheduledJobs[key])
 
     for (const script of scripts) {
-      const isScriptEnabled = schedulerState.scriptStates[script.id] ?? false
+      const isScriptEnabled = schedulerState.scriptStates[script.id] ?? true
       if (isScriptEnabled) {
         for (const schedule of script.schedules) {
           scheduleScript(script, schedule, schedulerState.globalEnabled)
@@ -89,18 +89,22 @@ export function scheduleScript(script: Script, schedule: string, isGlobalSchedul
   try {
     scheduledJobs[jobKey] = cron.schedule(schedule, async () => {
       const currentState = await getSchedulerState()
-      if (currentState.globalEnabled && currentState.scriptStates[script.id]) {
+      if (currentState.globalEnabled && currentState.scriptStates[script.id] !== false) {
         logInfo('scheduler', `Executing scheduled script: ${script.name} (ID: ${script.id})`)
         await executeScript(script)
       } else {
         logWarn('scheduler', `Skipping execution of script ${script.name} (ID: ${script.id})`, {
           globalScheduler: currentState.globalEnabled ? 'Enabled' : 'Disabled',
-          scriptScheduler: currentState.scriptStates[script.id] ? 'Enabled' : 'Disabled'
+          scriptScheduler: currentState.scriptStates[script.id] !== false ? 'Enabled' : 'Disabled'
         })
       }
     }, {
       scheduled: isGlobalSchedulerEnabled
     })
+
+    if (isGlobalSchedulerEnabled) {
+      scheduledJobs[jobKey].start()
+    }
 
     logInfo('scheduler', `Scheduled script ${script.name} (ID: ${script.id}) with schedule: ${schedule}`, {
       jobStatus: isGlobalSchedulerEnabled ? 'started' : 'created but not started'
@@ -210,15 +214,20 @@ export async function updateScriptSchedulerState(scriptId: string, isEnabled: bo
     const script = scripts.find(s => s.id === scriptId)
 
     if (script) {
-      // Remove existing schedules for this script
-      script.schedules.forEach(schedule => removeSchedule(scriptId, schedule))
-
-      // Reschedule if enabled
-      if (isEnabled) {
-        for (const schedule of script.schedules) {
+      // Update existing schedules for this script
+      script.schedules.forEach(schedule => {
+        const jobKey = `${scriptId}_${schedule}`
+        if (scheduledJobs[jobKey]) {
+          if (isEnabled && currentState.globalEnabled) {
+            scheduledJobs[jobKey].start()
+          } else {
+            scheduledJobs[jobKey].stop()
+          }
+        } else if (isEnabled) {
+          // If the job doesn't exist and we're enabling it, create a new one
           scheduleScript(script, schedule, currentState.globalEnabled)
         }
-      }
+      })
 
       logInfo('scheduler', `Script ${script.name} (ID: ${scriptId}) scheduler state updated`, { isEnabled })
     } else {

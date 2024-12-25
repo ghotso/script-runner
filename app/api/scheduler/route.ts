@@ -14,7 +14,7 @@ async function getSchedulerState() {
     return JSON.parse(data)
   } catch (error) {
     logError('api', 'Error reading scheduler state', { error })
-    return { globalEnabled: false, scriptStates: {} }
+    return { globalEnabled: true, scriptStates: {} }
   }
 }
 
