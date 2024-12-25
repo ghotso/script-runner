@@ -76,8 +76,14 @@ export async function POST(request: Request, { params }: { params: { id: string 
       triggeredBySchedule: false
     }
 
-    scripts[scriptIndex].executions = [execution, ...(scripts[scriptIndex].executions || [])].slice(0, 20)
-    await fs.writeFile(dataFile, JSON.stringify(scripts, null, 2))
+    const logEntry = {
+      id: execution.id,
+      status: execution.status,
+      timestamp: execution.timestamp,
+      runtime: execution.runtime,
+      triggeredBySchedule: execution.triggeredBySchedule
+    }
+    await logInfo(script.id, 'Script execution completed', logEntry)
 
     await logInfo(script.id, 'Script execution completed', {
       status: execution.status,

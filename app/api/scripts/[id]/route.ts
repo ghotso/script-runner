@@ -30,6 +30,8 @@ export async function PUT(request: NextRequest) {
     if (index === -1) {
       return NextResponse.json({ error: 'Script not found' }, { status: 404 })
     }
+    // Remove executions from the updated script
+    delete updatedScript.executions
     scripts[index] = { ...scripts[index], ...updatedScript }
     await fs.writeFile(dataFile, JSON.stringify(scripts, null, 2))
     return NextResponse.json(scripts[index])

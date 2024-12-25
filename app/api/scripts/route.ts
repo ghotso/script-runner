@@ -34,7 +34,8 @@ export async function POST(request: Request) {
     const data = await fs.readFile(dataFile, 'utf-8')
     const scripts = JSON.parse(data)
     newScript.id = Date.now().toString()
-    newScript.executions = []
+    // Remove the executions array
+    delete newScript.executions
     scripts.push(newScript)
     await fs.writeFile(dataFile, JSON.stringify(scripts, null, 2))
     return NextResponse.json(newScript, { status: 201 })

@@ -18,7 +18,33 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const { isGlobalSchedulerEnabled, toggleGlobalScheduler } = useScheduler()
+  const { isGlobalSchedulerEnabled, setIsGlobalSchedulerEnabled, isLoading, setIsLoading, showToast } = useScheduler()
+
+  const toggleGlobalScheduler = async () => {
+    if (isLoading) return
+
+    setIsLoading(true)
+    try {
+      const response = await fetch('/api/scheduler', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'updateGlobal', isEnabled: !isGlobalSchedulerEnabled }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update scheduler state')
+      }
+
+      const data = await response.json()
+      setIsGlobalSchedulerEnabled(data.globalEnabled)
+      showToast.success(`Global scheduler ${data.globalEnabled ? 'enabled' : 'disabled'}`)
+    } catch (error) {
+      console.error('Error toggling global scheduler:', error)
+      showToast.error('Failed to update scheduler state')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <>

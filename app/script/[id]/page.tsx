@@ -35,6 +35,16 @@ export default function ScriptDetails() {
         }
         const data = await response.json()
         setScript(data)
+
+        // Fetch executions separately
+        const executionsResponse = await fetch(`/api/scripts/${params.id}/executions`)
+        if (executionsResponse.ok) {
+          const executionsData = await executionsResponse.json()
+          setScript(prevScript => ({
+            ...prevScript!,
+            executions: executionsData.executions
+          }))
+        }
       } catch (error) {
         console.error('Error fetching script:', error)
         showToast.error('Failed to load script')
